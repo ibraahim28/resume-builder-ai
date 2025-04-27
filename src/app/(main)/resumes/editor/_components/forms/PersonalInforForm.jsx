@@ -35,64 +35,52 @@ export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
     },
   });
 
+  const timeoutRef = useRef();
+
   // Auto-save whenever form values change
 
-  const watchedFields = form.watch([
-    "firstName",
-    "lastName",
-    "jobTitle",
-    "city",
-    "country",
-    "phone",
-    "email",
-    "photo",
-  ]);
-
   useEffect(() => {
-    const saveFormData = async () => {
-      if (Object.keys(form.formState.dirtyFields).length > 0) {
+    const subscription = form.watch((value, { name, type }) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  
+      timeoutRef.current = setTimeout(async () => {
         setSaveStatus("saving");
-
         try {
-          await form.trigger();
-          if (Object.keys(form.formState.errors).length > 0) {
+          const isValid = await form.trigger(); // Validate current form
+  
+          if (!isValid) {
             setSaveStatus("error");
             return;
           }
-
+  
+          const rawValues = form.getValues();
           setResumeData((prev) => ({
             ...prev,
-            ...form.getValues(), // get final values
+            ...rawValues,
           }));
-          console.log(form.getValues());
+  
+          console.log(rawValues);
           setSaveStatus("saved");
         } catch (error) {
-          console.error("Error saving form:", error);
-          return setSaveStatus("error");
+          console.error("Error saving work experiences:", error);
+          setSaveStatus("error");
         }
-      }
+      }, 2000); // 2 seconds debounce
+    });
+  
+    return () => {
+      subscription.unsubscribe();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-
-    const timeoutId = setTimeout(saveFormData, 1000);
-    return () => clearTimeout(timeoutId);
-  }, [watchedFields, setResumeData]);
-
-  // useEffect(()=>{
-  //   const {unsubscribe}= form.watch(async () => {
-  //     const isValid = await form.trigger();
-  //     if (!isValid) return;
-
-  //     //save data
-  //   })
-  //   return unsubscribe;
-  // },[form])
+  }, [form, setResumeData]);
+  
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div className="space-y-1.5 text-center">
         <h2 className="text-2xl font-semibold">Personal info</h2>
         <p className="text-sm text-muted-foreground">Tell us about yourself.</p>
-        {saveStatus === "saving" && (
+        {/* {saveStatus === "saving" && (
           <p className="text-xs text-amber-500">Saving...</p>
         )}
         {saveStatus === "saved" && (
@@ -102,7 +90,7 @@ export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
           <p className="text-xs text-red-500">
             Validation error - please check form fields
           </p>
-        )}
+        )} */}
       </div>
 
       <Form {...form}>
@@ -155,7 +143,7 @@ export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
                 <FormItem>
                   <FormLabel>First name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="John" autoFocus  {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -168,7 +156,7 @@ export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
                 <FormItem>
                   <FormLabel>Last name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="Doe" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -183,7 +171,7 @@ export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
               <FormItem>
                 <FormLabel>Job title</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input placeholder="Data Analyst" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -198,7 +186,7 @@ export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
                 <FormItem>
                   <FormLabel>City</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="Karachi" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -211,7 +199,7 @@ export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
                 <FormItem>
                   <FormLabel>Country</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="Pakistan" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -226,7 +214,7 @@ export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
               <FormItem>
                 <FormLabel>Phone</FormLabel>
                 <FormControl>
-                  <Input {...field} type="tel" />
+                  <Input placeholder="+92 123 456 7890" {...field} type="tel" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -240,7 +228,7 @@ export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input {...field} type="email" />
+                  <Input placeholder="johndoe@email.com" {...field} type="email" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

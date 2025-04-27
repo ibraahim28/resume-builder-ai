@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { educationSchema } from "@/lib/formValidations";
@@ -22,11 +22,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const EducationForm = ({ defaultValues, onSubmit }) => {
+const EducationForm = ({ resumeData, setResumeData }) => {
+  const timeoutRef = useRef();
+  const [saveStatus, setSaveStatus] = useState(null);
+
   const form = useForm({
     resolver: zodResolver(educationSchema),
-    defaultValues: defaultValues || {
-      educations: [
+    defaultValues: {
+      educations: resumeData.educations || [
         {
           degree: "",
           school: "",
@@ -42,9 +45,40 @@ const EducationForm = ({ defaultValues, onSubmit }) => {
     name: "educations",
   });
 
-  const handleSubmit = (data) => {
-    if (onSubmit) onSubmit(data);
-  };
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+      timeoutRef.current = setTimeout(async () => {
+        setSaveStatus("saving");
+        try {
+          const isValid = await form.trigger(); // Validate current form
+
+          if (!isValid) {
+            setSaveStatus("error");
+            return;
+          }
+
+          const rawValues = form.getValues();
+          setResumeData((prev) => ({
+            ...prev,
+            ...rawValues,
+          }));
+
+          console.log(rawValues);
+          setSaveStatus("saved");
+        } catch (error) {
+          console.error("Error saving work experiences:", error);
+          setSaveStatus("error");
+        }
+      }, 2000); // 2 seconds debounce
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [form, setResumeData]);
 
   const addNewEducation = () => {
     append({
@@ -64,7 +98,7 @@ const EducationForm = ({ defaultValues, onSubmit }) => {
         </p>
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <form className="space-y-6">
           {fields.map((item, index) => (
             <Card key={item.id}>
               <CardHeader className="pb-2">
@@ -80,7 +114,7 @@ const EducationForm = ({ defaultValues, onSubmit }) => {
                     <FormItem>
                       <FormLabel>Degree</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Bachelor of Science" />
+                        <Input {...field} autoFocus placeholder="Bachelor of Science" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -1,34 +1,25 @@
 "use client";
-import React, { useState } from "react";
+
+import { useState, useEffect, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { workExperienceSchema } from "@/lib/formValidations";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2, ChevronUp, ChevronDown } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { PlusCircle, Trash2, ChevronUp, ChevronDown, GripHorizontal } from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-const WorkExperienceForm = ({ defaultValues, onSubmit }) => {
+export default function WorkExperienceForm({ resumeData = {}, setResumeData }) {
+  const [saveStatus, setSaveStatus] = useState(null); 
+  const timeoutRef = useRef();
+
   const form = useForm({
     resolver: zodResolver(workExperienceSchema),
-    defaultValues: defaultValues || {
-      workExperiences: [
+    defaultValues: {
+      workExperiences: resumeData.workExperiences || [
         {
           position: "",
           company: "",
@@ -40,16 +31,46 @@ const WorkExperienceForm = ({ defaultValues, onSubmit }) => {
     },
   });
 
-  // Initialize field array
   const { fields, append, remove, swap } = useFieldArray({
     control: form.control,
     name: "workExperiences",
   });
 
-  const handleSubmit = (data) => {
-    if (onSubmit) onSubmit(data);
-  };
-
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  
+      timeoutRef.current = setTimeout(async () => {
+        setSaveStatus("saving");
+        try {
+          const isValid = await form.trigger(); // Validate current form
+  
+          if (!isValid) {
+            setSaveStatus("error");
+            return;
+          }
+  
+          const rawValues = form.getValues();
+          setResumeData((prev) => ({
+            ...prev,
+            ...rawValues,
+          }));
+  
+          console.log(rawValues);
+          setSaveStatus("saved");
+        } catch (error) {
+          console.error("Error saving work experiences:", error);
+          setSaveStatus("error");
+        }
+      }, 2000); // 2 seconds debounce
+    });
+  
+    return () => {
+      subscription.unsubscribe();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [form, setResumeData]);
+  
   const addNewExperience = () => {
     append({
       position: "",
@@ -67,14 +88,27 @@ const WorkExperienceForm = ({ defaultValues, onSubmit }) => {
         <p className="text-sm text-muted-foreground">
           Add your work history and professional experience
         </p>
+        {/* {saveStatus === "saving" && (
+          <p className="text-xs text-amber-500">Saving...</p>
+        )}
+        {saveStatus === "saved" && (
+          <p className="text-xs text-green-500">All changes saved</p>
+        )}
+        {saveStatus === "error" && (
+          <p className="text-xs text-red-500">
+            Validation error - please check form fields
+          </p>
+        )} */}
       </div>
+
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <form className="space-y-6">
           {fields.map((item, index) => (
             <Card key={item.id} className="relative">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-medium">
+                <CardTitle className="text-lg font-medium flex items-center justify-between">
                   Experience {index + 1}
+                  <GripHorizontal className="text-muted-foreground cursor-grab " />
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -85,7 +119,7 @@ const WorkExperienceForm = ({ defaultValues, onSubmit }) => {
                     <FormItem>
                       <FormLabel>Position</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Senior Frontend Developer" />
+                        <Input {...field} autoFocus placeholder="Senior Frontend Developer" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -145,9 +179,6 @@ const WorkExperienceForm = ({ defaultValues, onSubmit }) => {
                           rows={4}
                         />
                       </FormControl>
-                      <FormDescription>
-                        Use bullet points by starting lines with • or - for better readability
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -203,6 +234,4 @@ const WorkExperienceForm = ({ defaultValues, onSubmit }) => {
       </Form>
     </div>
   );
-};
-
-export default WorkExperienceForm;
+}

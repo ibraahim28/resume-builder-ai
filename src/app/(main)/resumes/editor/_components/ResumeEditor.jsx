@@ -50,7 +50,7 @@ const ResumeEditor = () => {
         </div>
 
         <div className="grow md:border-r" />
-        <div className="hidden md:flex w-1/2 p-4">
+        <div className="hidden md:flex w-1/2 p-4 overflow-y-auto">
         <pre> {JSON.stringify(resumeData, null, 2)} </pre>
         </div>
       </main>

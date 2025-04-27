@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { generalInfoSchema } from "@/lib/formValidations";
@@ -24,48 +24,46 @@ const GeneralInfoForm = ({ resumeData = {}, setResumeData }) => {
   });
 
   const [saveStatus, setSaveStatus] = useState(null);
+ 
+  const timeoutRef = useRef();
 
   // Auto-save whenever form values change
 
-  const watchedFields = form.watch([
-    "firstName",
-    "lastName",
-    "jobTitle",
-    "city",
-    "country",
-    "phone",
-    "email",
-    "photo",
-  ]);
-
   useEffect(() => {
-    const saveFormData = async () => {
-      if (Object.keys(form.formState.dirtyFields).length > 0) {
+    const subscription = form.watch((value, { name, type }) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  
+      timeoutRef.current = setTimeout(async () => {
         setSaveStatus("saving");
-
         try {
-          await form.trigger();
-          if (Object.keys(form.formState.errors).length > 0) {
+          const isValid = await form.trigger(); // Validate current form
+  
+          if (!isValid) {
             setSaveStatus("error");
             return;
           }
-
+  
+          const rawValues = form.getValues();
           setResumeData((prev) => ({
             ...prev,
-            ...form.getValues(), // get final values
+            ...rawValues,
           }));
-          console.log(form.getValues());
+  
+          console.log(rawValues);
           setSaveStatus("saved");
         } catch (error) {
-          console.error("Error saving form:", error);
-          return setSaveStatus("error");
+          console.error("Error saving work experiences:", error);
+          setSaveStatus("error");
         }
-      }
+      }, 2000); // 2 seconds debounce
+    });
+  
+    return () => {
+      subscription.unsubscribe();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-
-    const timeoutId = setTimeout(saveFormData, 1000);
-    return () => clearTimeout(timeoutId);
-  }, [watchedFields, setResumeData]);
+  }, [form, setResumeData]);
+  
 
   return (
     <div className="max-w-xl mx-auto space-y-6">

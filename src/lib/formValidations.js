@@ -37,34 +37,46 @@ export const personalInfoSchema = z.object({
 });
 
 export const educationSchema = z.object({
-  schoolName: z.string().trim().optional().or(z.literal("")),
-  degree: z.string().trim().optional().or(z.literal("")),
-  startDate: z.string().trim().optional().or(z.literal("")),
-  endDate: z.string().trim().optional().or(z.literal("")),
+  educations: z
+    .array(
+      z.object({
+        degree: optionalString,
+        school: optionalString,
+        startDate: optionalString,
+        endDate: optionalString,
+      })
+    )
+    .optional(),
 });
 
 export const workExperienceSchema = z.object({
-  companyName: z.string().trim().optional().or(z.literal("")),
-  jobTitle: z.string().trim().optional().or(z.literal("")),
-  startDate: z.string().trim().optional().or(z.literal("")),
-  endDate: z.string().trim().optional().or(z.literal("")),
-  location: z.string().trim().optional().or(z.literal("")),
-  currentlyWorking: z.boolean().default(false),
-  description: z.string().trim().optional().or(z.literal("")),
+  wrokExperiences: z
+    .array(
+      z.object({
+        position: optionalString,
+        company: optionalString,
+        startDate: optionalString,
+        endDate: optionalString,
+        description: optionalString,
+      })
+    )
+    .optional(),
 });
 
 export const skillsSchema = z.object({
-  skillsList: z.array(z.string()),
+  skills: z.array(z.string().trim()).optional(),
 });
 
-export const projectSchema = z.object({
-  projectName: z.string().trim().optional().or(z.literal("")),
-  role: z.string().trim().optional().or(z.literal("")),
-  startDate: z.string().trim().optional().or(z.literal("")),
-  endDate: z.string().trim().optional().or(z.literal("")),
-  projectUrl: z.string().trim().url().optional().or(z.literal("")),
-  description: z.string().trim().optional().or(z.literal("")),
-  technologies: z.string().trim().optional().or(z.literal("")),
+export const summarySchema = z.object({
+  summary: optionalString,
 });
 
-export const summarySchema = 123;
+export const resumeSchema = z.object({
+  ...generalInfoSchema.shape,
+  ...personalInfoSchema.shape,
+  ...workExperienceSchema.shape,
+  ...educationSchema.shape,
+  ...skillsSchema.shape,
+  colorHex : optionalString,
+  borderStyle : optionalString,
+});
