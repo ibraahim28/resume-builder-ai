@@ -141,7 +141,7 @@ const EducationForm = ({ resumeData, setResumeData }) => {
                       <FormItem>
                         <FormLabel>Start Date</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Sep 2018" />
+                          <Input {...field} placeholder="Sep 2020" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -154,7 +154,7 @@ const EducationForm = ({ resumeData, setResumeData }) => {
                       <FormItem>
                         <FormLabel>End Date</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Jun 2022 or Present" />
+                          <Input {...field} placeholder="Jun 2022" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

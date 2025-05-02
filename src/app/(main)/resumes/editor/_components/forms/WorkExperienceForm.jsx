@@ -5,7 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { workExperienceSchema } from "@/lib/formValidations";
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -146,7 +146,7 @@ export default function WorkExperienceForm({ resumeData = {}, setResumeData }) {
                       <FormItem>
                         <FormLabel>Start Date</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Mar 2020" />
+                          <Input {...field} placeholder="Mar 2024" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -159,13 +159,14 @@ export default function WorkExperienceForm({ resumeData = {}, setResumeData }) {
                       <FormItem>
                         <FormLabel>End Date</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Apr 2023 or Present" />
+                          <Input {...field} placeholder="Apr 2025" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
+                <FormDescription>Leave <span className="font-semibold">end date</span> empty if you are currently working here.</FormDescription>
                 <FormField
                   control={form.control}
                   name={`workExperiences.${index}.description`}
@@ -209,6 +210,7 @@ export default function WorkExperienceForm({ resumeData = {}, setResumeData }) {
                 </div>
                 <Button
                   type="button"
+                  className={"cursor-pointer"}
                   variant="destructive"
                   size="sm"
                   onClick={() => fields.length > 1 && remove(index)}
@@ -224,7 +226,7 @@ export default function WorkExperienceForm({ resumeData = {}, setResumeData }) {
           <Button
             type="button"
             variant="outline"
-            className="w-full"
+            className="w-full cursor-pointer"
             onClick={addNewExperience}
           >
             <PlusCircle className="h-4 w-4 mr-2" />

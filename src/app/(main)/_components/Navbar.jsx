@@ -5,8 +5,8 @@ import Link from "next/link";
 export default function Navbar() {
   const { user, isLoaded } = useUser();
   return (
-    <header className="border-b bg-primary-foreground px-2 shadow-md">
-      <div className="container flex h-14 justify-between items-center">
+    <header className="border-b bg-primary-foreground px-6 shadow-md">
+      <div className=" flex h-14 justify-between items-center">
         <div className="flex gap-4 items-center">
           <Link href="/" className="flex items-center font-semibold">
             <span className="text-primary text-2xl font-bold">Kindley</span>

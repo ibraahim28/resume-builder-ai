@@ -4,6 +4,7 @@ import StepBreadcrumbs from "./StepBreadcrumbs";
 import { useSearchParams } from "next/navigation";
 import Footer from "./Footer";
 import { useState } from "react";
+import ResumePreviewSection from "@/components/ResumePreviewSection";
 
 const ResumeEditor = () => {
   const searchParams = useSearchParams();
@@ -50,9 +51,7 @@ const ResumeEditor = () => {
         </div>
 
         <div className="grow md:border-r" />
-        <div className="hidden md:flex w-1/2 p-4 overflow-y-auto">
-        <pre> {JSON.stringify(resumeData, null, 2)} </pre>
-        </div>
+       <ResumePreviewSection resumeData={resumeData} setResumeData={setResumeData} />
       </main>
 
       <Footer currentStep={currentStep} setCurrentStep={setCurrentStep} />

@@ -33,11 +33,12 @@ const SummaryForm = ({ defaultValues, onSubmit, onGenerateSummary }) => {
       <div className="space-y-1.5 text-center">
         <h2 className="text-2xl font-semibold">Professional Summary</h2>
         <p className="text-sm text-muted-foreground">
-          Create a compelling summary of your qualifications and experience
+          Create a compelling summary of your qualifications and experience{" "}
+          <br /> or let the AI generate one based on your entered Data.
         </p>
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form className="space-y-4">
           {onGenerateSummary && (
             <Button
               type="button"
@@ -49,7 +50,7 @@ const SummaryForm = ({ defaultValues, onSubmit, onGenerateSummary }) => {
               Generate Summary
             </Button>
           )}
-          
+
           <FormField
             control={form.control}
             name="summary"
@@ -64,7 +65,8 @@ const SummaryForm = ({ defaultValues, onSubmit, onGenerateSummary }) => {
                   />
                 </FormControl>
                 <FormDescription>
-                  Keep your summary concise (3-5 sentences) and highlight your most relevant qualifications
+                  Keep your summary concise (3-5 sentences) and highlight your
+                  most relevant qualifications
                 </FormDescription>
                 <FormMessage />
               </FormItem>

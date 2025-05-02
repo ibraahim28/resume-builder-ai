@@ -18,9 +18,6 @@ export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
   const [saveStatus, setSaveStatus] = useState(null); // null, 'saving', 'saved', 'error'
   const photoInputRef = useRef(null);
 
-  // Assuming you've already defined photo validation in your personalInfoSchema
-  // If not, you should update it in @/lib/formValidations.js
-
   const form = useForm({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
