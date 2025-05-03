@@ -19,7 +19,7 @@ const GeneralInfoForm = ({ resumeData = {}, setResumeData }) => {
     resolver: zodResolver(generalInfoSchema),
     defaultValues: {
       title: resumeData.title || "",
-      description: resumeData.desciption || "",
+      description: resumeData.description || "",
     },
   });
 
@@ -72,7 +72,7 @@ const GeneralInfoForm = ({ resumeData = {}, setResumeData }) => {
         <p className="text-sm text-muted-foreground">
           This will not appear on your resume.
         </p>
-        {saveStatus === "saving" && (
+        {/* {saveStatus === "saving" && (
           <p className="text-xs text-amber-500">Saving...</p>
         )}
         {saveStatus === "saved" && (
@@ -82,7 +82,7 @@ const GeneralInfoForm = ({ resumeData = {}, setResumeData }) => {
           <p className="text-xs text-red-500">
             Validation error - please check form fields
           </p>
-        )}
+        )} */}
       </div>
       <Form {...form}>
         <form className="space-y-2">

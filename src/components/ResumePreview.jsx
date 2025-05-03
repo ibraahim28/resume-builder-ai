@@ -1,6 +1,7 @@
 import useDimensions from "@/hooks/useDimensions";
 import { useRef } from "react";
 import PersonalInfoPreviewSection from "./PersonalInfoPreviewSection";
+import SummaryPreviewSection from "./SummaryPreviewSection";
 
 const { cn } = require("@/lib/utils");
 
@@ -24,7 +25,8 @@ const ResumePreview = ({ resumeData, classname }) => {
       >
       
       <PersonalInfoPreviewSection resumeData={resumeData} />
-    </div>
+      <SummaryPreviewSection resumeData={resumeData} />
+     </div>
     </div>
   );
 };

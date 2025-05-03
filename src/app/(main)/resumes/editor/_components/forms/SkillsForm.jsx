@@ -17,7 +17,7 @@ import { X } from "lucide-react";
 
 const SkillsForm = ({ resumeData = {}, setResumeData }) => {
   const [newSkill, setNewSkill] = useState("");
-  const [saveStatus, setSaveStatus] = useState("idle");
+  const [saveStatus, setSaveStatus] = useState("null");
   const timeoutRef = useRef();
 
   const form = useForm({

@@ -15,7 +15,7 @@ import { useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
-  const [saveStatus, setSaveStatus] = useState(null); // null, 'saving', 'saved', 'error'
+  const [saveStatus, setSaveStatus] = useState(null);
   const photoInputRef = useRef(null);
 
   const form = useForm({
