@@ -13,8 +13,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useResumeStore } from "@/stores/useResumeStore";
 
-const GeneralInfoForm = ({ resumeData = {}, setResumeData }) => {
+const GeneralInfoForm = () => {
+    const {resumeData, setResumeData} = useResumeStore();
+  
   const form = useForm({
     resolver: zodResolver(generalInfoSchema),
     defaultValues: {
@@ -36,7 +39,7 @@ const GeneralInfoForm = ({ resumeData = {}, setResumeData }) => {
       timeoutRef.current = setTimeout(async () => {
         setSaveStatus("saving");
         try {
-          const isValid = await form.trigger(); // Validate current form
+          const isValid = await form.trigger();
   
           if (!isValid) {
             setSaveStatus("error");
@@ -46,16 +49,18 @@ const GeneralInfoForm = ({ resumeData = {}, setResumeData }) => {
           const rawValues = form.getValues();
           setResumeData((prev) => ({
             ...prev,
-            ...rawValues,
+            generalInfo: {
+              ...prev.generalInfo,
+              ...rawValues, 
+            },
           }));
-  
-          console.log(rawValues);
+          
           setSaveStatus("saved");
         } catch (error) {
-          console.error("Error saving work experiences:", error);
+          console.error("Error saving general info:", error);
           setSaveStatus("error");
         }
-      }, 2000); // 2 seconds debounce
+      }, 2000);
     });
   
     return () => {
@@ -63,6 +68,7 @@ const GeneralInfoForm = ({ resumeData = {}, setResumeData }) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [form, setResumeData]);
+  
   
 
   return (

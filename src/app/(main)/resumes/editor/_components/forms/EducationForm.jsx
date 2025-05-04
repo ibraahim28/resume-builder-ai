@@ -21,10 +21,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useResumeStore } from "@/stores/useResumeStore";
 
-const EducationForm = ({ resumeData, setResumeData }) => {
+const EducationForm = () => {
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState(null);
+  const { resumeData, setResumeData } = useResumeStore();
 
   const form = useForm({
     resolver: zodResolver(educationSchema),
@@ -48,32 +50,35 @@ const EducationForm = ({ resumeData, setResumeData }) => {
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
+  
       timeoutRef.current = setTimeout(async () => {
         setSaveStatus("saving");
         try {
-          const isValid = await form.trigger(); // Validate current form
-
+          const isValid = await form.trigger();
+  
           if (!isValid) {
             setSaveStatus("error");
             return;
           }
-
+  
           const rawValues = form.getValues();
           setResumeData((prev) => ({
             ...prev,
-            ...rawValues,
+            education: {
+              ...prev.education,
+              educations : rawValues.educations, 
+            },
           }));
-
-          console.log(rawValues);
+          
           setSaveStatus("saved");
+          console.log("ResumeData:", resumeData);
         } catch (error) {
-          console.error("Error saving work experiences:", error);
+          console.error("Error saving general info:", error);
           setSaveStatus("error");
         }
-      }, 2000); // 2 seconds debounce
+      }, 2000);
     });
-
+  
     return () => {
       subscription.unsubscribe();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);

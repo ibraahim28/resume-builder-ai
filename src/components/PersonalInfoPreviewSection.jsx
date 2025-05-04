@@ -1,11 +1,12 @@
+import { useResumeStore } from "@/stores/useResumeStore";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
-const PersonalInfoPreviewSection = ({ resumeData }) => {
+const PersonalInfoPreviewSection = () => {
+  const { resumeData } = useResumeStore();
+
   const { photo, firstName, lastName, jobTitle, city, country, phone, email } =
-    resumeData;
-
-
+    resumeData.personalInfo;
 
   const [photoSrc, setPhotoSrc] = useState(photo instanceof File ? "" : photo);
 
@@ -38,16 +39,16 @@ const PersonalInfoPreviewSection = ({ resumeData }) => {
           </p>
           <p className="font-medium"> {jobTitle} </p>
         </div>
-        <p className="text-xs text-gray-500"> 
+        <p className="text-xs text-gray-500">
           {city}
           {city && country ? ", " : ""}
           {country}
-          {(city || country) && (phone || email) ? " • " : "" }
+          {(city || country) && (phone || email) ? " • " : ""}
           {[phone, email].filter(Boolean).join(" • ")}
-           </p>
+        </p>
       </div>
     </div>
-  ); 
+  );
 };
 
 export default PersonalInfoPreviewSection;

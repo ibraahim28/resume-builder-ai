@@ -1,0 +1,359 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { projectsSchema, workExperienceSchema } from "@/lib/formValidations";
+import { useResumeStore } from "@/stores/useResumeStore";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  PlusCircle,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+  GripHorizontal,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+export default function ExperiencesForm() {
+  const { resumeData, setResumeData, hasWorkExperience, setHasWorkExperience } =
+    useResumeStore();
+
+  const timeoutRef = useRef();
+
+  const defaultWorkExperiences = [
+    {
+      position: "",
+      company: "",
+      startDate: "",
+      endDate: "",
+      description: "",
+    },
+  ];
+
+  const defaultProjects = [
+    {
+      title: "",
+      projectLink: "",
+      description: "",
+    },
+  ];
+
+  const isFormEmpty = (entries) =>
+    Array.isArray(entries) &&
+    entries.every((entry) =>
+      Object.values(entry).every((val) => !val || val.trim?.() === "")
+    );
+
+  const form = useForm({
+    resolver: zodResolver(
+      hasWorkExperience ? workExperienceSchema : projectsSchema
+    ),
+
+    defaultValues: hasWorkExperience
+      ? {
+          workExperiences:
+            resumeData.workExperience?.workExperiences ||
+            defaultWorkExperiences,
+        }
+      : {
+          projects: resumeData.project?.projects || defaultProjects,
+        },
+  });
+
+  const { fields, append, remove, swap } = useFieldArray({
+    control: form.control,
+    name: hasWorkExperience ? "workExperiences" : "projects",
+  });
+
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+      
+      console.log("Form Values:", values);
+
+      timeoutRef.current = setTimeout(async () => {
+        const isValid = await form.trigger();
+        if (!isValid) return;
+
+        setResumeData((prev) => {
+          if (hasWorkExperience) {
+            
+            return {
+              ...prev,
+              workExperience: {
+                ...prev.workExperience, 
+                workExperiences: values.workExperiences || [], 
+              },
+            };
+          } else {
+             
+            return {
+              ...prev,
+              project: { 
+                ...prev.project, 
+                projects: values.projects || [], 
+              },
+            };
+          }
+        });
+         console.log("Updated Resume Data:", useResumeStore.getState().resumeData);
+      }, 2000);
+    });
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeoutRef.current);
+    };
+  }, [form, setResumeData, hasWorkExperience]);
+
+  const handleToggleExperience = () => {
+    const projects = form.getValues("projects") || [];
+    if (!isFormEmpty(projects)) {
+      alert("Please clear your projects before switching.");
+      return;
+    }
+
+    setHasWorkExperience(true);
+
+    form.reset({
+      workExperiences:
+        resumeData.workExperience?.workExperiences || defaultWorkExperiences,
+    });
+  };
+
+  const handleToggleProjects = () => {
+    const workExperiences = form.getValues("workExperiences") || [];
+
+    if (!isFormEmpty(workExperiences)) {
+      alert("Please clear your work experience before switching.");
+      return;
+    }
+
+    setHasWorkExperience(false);
+
+    form.reset({
+      projects: resumeData.project?.projects || defaultProjects,
+    });
+  };
+
+  return (
+    <div
+      key={hasWorkExperience ? "work" : "projects"}
+      className="max-w-xl mx-auto space-y-6"
+    >
+      <div className="space-y-1.5 text-center">
+        <h2 className="text-2xl font-semibold">
+          {hasWorkExperience ? "Work Experience" : "Projects"}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {hasWorkExperience
+            ? "Add your work history and professional experience"
+            : "Add projects to highlight your skills and portfolio"}
+        </p>
+      </div>
+
+      <div className="flex justify-center gap-4">
+        <Button
+          type="button"
+          variant={hasWorkExperience ? "outline" : "default"}
+          onClick={handleToggleExperience}
+        >
+          I have Work Experience
+        </Button>
+        <Button
+          type="button"
+          variant={!hasWorkExperience ? "outline" : "default"}
+          onClick={handleToggleProjects}
+        >
+          I want to add Projects
+        </Button>
+      </div>
+
+      <Form {...form}>
+        <form className="space-y-6">
+          {fields.map((item, index) => (
+            <Card key={item.id}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-medium flex items-center justify-between">
+                  {hasWorkExperience
+                    ? `Experience ${index + 1}`
+                    : `Project ${index + 1}`}
+                  <GripHorizontal className="text-muted-foreground cursor-grab" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name={
+                    hasWorkExperience
+                      ? `workExperiences.${index}.position`
+                      : `projects.${index}.title`
+                  }
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {hasWorkExperience ? "Position" : "Project Title"}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder={
+                            hasWorkExperience
+                              ? "Software Engineer"
+                              : "My Portfolio Site"
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {hasWorkExperience ? (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name={`workExperiences.${index}.company`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Company</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Google Inc." />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name={`workExperiences.${index}.startDate`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Start Date</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Jan 2023" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`workExperiences.${index}.endDate`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>End Date</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Dec 2024" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <FormField
+                    control={form.control}
+                    name={`projects.${index}.projectLink`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Project Link</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="https://yourapp.com" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                <FormField
+                  control={form.control}
+                  name={
+                    hasWorkExperience
+                      ? `workExperiences.${index}.description`
+                      : `projects.${index}.description`
+                  }
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} rows={4} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+              <CardFooter className="flex justify-between border-t pt-3">
+                <div className="flex gap-2">
+                  {index > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => swap(index, index - 1)}
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {index < fields.length - 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => swap(index, index + 1)}
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => remove(index)}
+                  disabled={fields.length === 1}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Remove
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() =>
+              hasWorkExperience
+                ? append(defaultWorkExperiences[0])
+                : append(defaultProjects[0])
+            }
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add Another {hasWorkExperience ? "Experience" : "Project"}
+          </Button>
+        </form>
+      </Form>
+    </div>
+  );
+}

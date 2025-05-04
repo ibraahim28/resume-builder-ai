@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export const optionalString = z.string().trim().optional().or(z.literal(""));
@@ -50,7 +51,7 @@ export const educationSchema = z.object({
 });
 
 export const workExperienceSchema = z.object({
-  wrokExperiences: z
+  workExperiences: z
     .array(
       z.object({
         position: optionalString,
@@ -62,6 +63,19 @@ export const workExperienceSchema = z.object({
     )
     .optional(),
 });
+
+export const projectsSchema = z.object({
+  projects: z
+    .array(
+      z.object({
+        title: optionalString, 
+        projectLink: optionalString, 
+        description: optionalString,
+      })
+    )
+    .optional(),
+});
+
 
 export const skillsSchema = z.object({
   skills: z.array(z.string().trim()).optional(),
@@ -75,8 +89,10 @@ export const resumeSchema = z.object({
   ...generalInfoSchema.shape,
   ...personalInfoSchema.shape,
   ...workExperienceSchema.shape,
+  ...projectsSchema.shape,
   ...educationSchema.shape,
   ...skillsSchema.shape,
+  ...summarySchema.shape,
   colorHex : optionalString,
   borderStyle : optionalString,
 });

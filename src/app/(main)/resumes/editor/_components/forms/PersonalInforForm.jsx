@@ -10,61 +10,66 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { personalInfoSchema } from "@/lib/formValidations";
+import { useResumeStore } from "@/stores/useResumeStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
-export default function PersonalInfoForm({ resumeData = {}, setResumeData }) {
+export default function PersonalInfoForm() {
   const [saveStatus, setSaveStatus] = useState(null);
   const photoInputRef = useRef(null);
+  const {resumeData, setResumeData} = useResumeStore();
 
   const form = useForm({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      firstName: resumeData.firstName || "",
-      lastName: resumeData.lastName || "",
-      jobTitle: resumeData.jobTitle || "",
-      city: resumeData.city || "",
-      country: resumeData.country || "",
-      phone: resumeData.phone || "",
-      email: resumeData.email || "",
-      photo: resumeData.photo || null,
-    },
+      firstName: resumeData.personalInfo?.firstName || "",
+      lastName: resumeData.personalInfo?.lastName || "",
+      jobTitle: resumeData.personalInfo?.jobTitle || "",
+      city: resumeData.personalInfo?.city || "",
+      country: resumeData.personalInfo?.country || "",
+      phone: resumeData.personalInfo?.phone || "",
+      email: resumeData.personalInfo?.email || "",
+      photo: resumeData.personalInfo?.photo || null,
+    },    
   });
 
   const timeoutRef = useRef();
 
-  // Auto-save whenever form values change
+   useEffect(() => {
+     const subscription = form.watch((value, { name, type }) => {
+       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+   
+       timeoutRef.current = setTimeout(async () => {
+         setSaveStatus("saving");
+         try {
+           const isValid = await form.trigger();
+   
+           if (!isValid) {
+             setSaveStatus("error");
+             return;
+           }
+   
+           const rawValues = form.getValues();
 
-  useEffect(() => {
-    const subscription = form.watch((value, { name, type }) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-  
-      timeoutRef.current = setTimeout(async () => {
-        setSaveStatus("saving");
-        try {
-          const isValid = await form.trigger(); // Validate current form
-  
-          if (!isValid) {
-            setSaveStatus("error");
-            return;
-          }
-  
-          const rawValues = form.getValues();
-          setResumeData((prev) => ({
+           console.log("rawValues", rawValues)
+           setResumeData((prev) => ({
             ...prev,
-            ...rawValues,
+            personalInfo: {
+              ...prev.personalInfo,
+              ...rawValues, 
+            },
           }));
-  
-          console.log(rawValues);
-          setSaveStatus("saved");
-        } catch (error) {
-          console.error("Error saving work experiences:", error);
-          setSaveStatus("error");
-        }
-      }, 2000); // 2 seconds debounce
-    });
-  
+          
+           setSaveStatus("saved");
+         } catch (error) {
+           console.error("Error saving general info:", error);
+           setSaveStatus("error");
+         }
+       }, 2000);
+     });
+   
+
     return () => {
       subscription.unsubscribe();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);

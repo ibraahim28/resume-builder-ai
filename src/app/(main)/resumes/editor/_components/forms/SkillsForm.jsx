@@ -14,11 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { useResumeStore } from "@/stores/useResumeStore";
 
-const SkillsForm = ({ resumeData = {}, setResumeData }) => {
+const SkillsForm = () => {
   const [newSkill, setNewSkill] = useState("");
   const [saveStatus, setSaveStatus] = useState("null");
   const timeoutRef = useRef();
+  const { resumeData, setResumeData } = useResumeStore();
 
   const form = useForm({
     resolver: zodResolver(skillsSchema),
@@ -30,40 +32,42 @@ const SkillsForm = ({ resumeData = {}, setResumeData }) => {
   const skills = form.watch("skills") || [];
 
   // Autosave effect with debounce
-  useEffect(() => {
-    const subscription = form.watch(() => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
-      timeoutRef.current = setTimeout(async () => {
-        setSaveStatus("saving");
-        try {
-          const isValid = await form.trigger();
-
-          if (!isValid) {
-            setSaveStatus("error");
-            return;
-          }
-
-          const rawValues = form.getValues();
-          setResumeData((prev) => ({
+   useEffect(() => {
+     const subscription = form.watch((value, { name, type }) => {
+       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+   
+       timeoutRef.current = setTimeout(async () => {
+         setSaveStatus("saving");
+         try {
+           const isValid = await form.trigger();
+   
+           if (!isValid) {
+             setSaveStatus("error");
+             return;
+           }
+   
+           const rawValues = form.getValues();
+           setResumeData((prev) => ({
             ...prev,
-            ...rawValues,
+            skills: {
+              ...prev.skills,
+              ...rawValues, 
+            },
           }));
-
-          console.log(rawValues);
-          setSaveStatus("saved");
-        } catch (error) {
-          console.error("Error saving skills:", error);
-          setSaveStatus("error");
-        }
-      }, 2000);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [form, setResumeData]);
+          
+           setSaveStatus("saved");
+         } catch (error) {
+           console.error("Error saving general info:", error);
+           setSaveStatus("error");
+         }
+       }, 2000);
+     });
+   
+     return () => {
+       subscription.unsubscribe();
+       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+     };
+   }, [form, setResumeData]);
 
   const addSkill = () => {
     if (newSkill.trim() && !skills.includes(newSkill.trim())) {

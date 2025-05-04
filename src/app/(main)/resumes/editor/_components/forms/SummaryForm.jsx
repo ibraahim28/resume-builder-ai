@@ -13,13 +13,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { useResumeStore } from "@/stores/useResumeStore";
 
-const SummaryForm = ({ resumeData, setResumeData }) => {
+const SummaryForm = () => {
+  const { resumeData, setResumeData } = useResumeStore();
   const form = useForm({
     resolver: zodResolver(summarySchema),
-    defaultValues: resumeData?.summary || {
-      summary: "",
-    },
+    defaultValues: {
+      summary: resumeData.summary?.summary || "",
+    }
+    
+    
   });
 
   const timeoutRef = useRef();
@@ -32,7 +36,7 @@ const SummaryForm = ({ resumeData, setResumeData }) => {
       timeoutRef.current = setTimeout(async () => {
         setSaveStatus("saving");
         try {
-          const isValid = await form.trigger(); // Validate current form
+          const isValid = await form.trigger(); 
 
           if (!isValid) {
             setSaveStatus("error");
@@ -42,8 +46,12 @@ const SummaryForm = ({ resumeData, setResumeData }) => {
           const rawValues = form.getValues();
           setResumeData((prev) => ({
             ...prev,
-            ...rawValues,
+            summary: {
+              ...prev.summary,
+              ...rawValues, 
+            },
           }));
+          
 
           console.log(rawValues);
           setSaveStatus("saved");
@@ -93,6 +101,7 @@ const SummaryForm = ({ resumeData, setResumeData }) => {
                     {...field}
                     placeholder="Experienced software developer with 5+ years of expertise in web development..."
                     rows={6}
+                    autoFocus
                   />
                 </FormControl>
                 <FormDescription>
