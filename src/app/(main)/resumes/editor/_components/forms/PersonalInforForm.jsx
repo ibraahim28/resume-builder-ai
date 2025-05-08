@@ -12,13 +12,14 @@ import { Input } from "@/components/ui/input";
 import { personalInfoSchema } from "@/lib/formValidations";
 import { useResumeStore } from "@/stores/useResumeStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 export default function PersonalInfoForm() {
-  const [saveStatus, setSaveStatus] = useState(null);
   const photoInputRef = useRef(null);
-  const {resumeData, setResumeData} = useResumeStore();
+  const { resumeData, setResumeData } = useResumeStore();
+  const timeoutRef = useRef();
+  const [saveStatus, setSaveStatus] = useState("null");
 
   const form = useForm({
     resolver: zodResolver(personalInfoSchema),
@@ -31,58 +32,78 @@ export default function PersonalInfoForm() {
       phone: resumeData.personalInfo?.phone || "",
       email: resumeData.personalInfo?.email || "",
       photo: resumeData.personalInfo?.photo || null,
-    },    
+    },
+    mode: "onChange",
   });
 
-  const timeoutRef = useRef();
+  useEffect(() => {
+    if (resumeData.personalInfo) {
+      const newValues = {
+        firstName: resumeData.personalInfo.firstName || "",
+        lastName: resumeData.personalInfo.lastName || "",
+        jobTitle: resumeData.personalInfo.jobTitle || "",
+        city: resumeData.personalInfo.city || "",
+        country: resumeData.personalInfo.country || "",
+        phone: resumeData.personalInfo.phone || "",
+        email: resumeData.personalInfo.email || "",
+        photo: resumeData.personalInfo.photo || null,
+      };
 
-   useEffect(() => {
-     const subscription = form.watch((value, { name, type }) => {
-       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-   
-       timeoutRef.current = setTimeout(async () => {
-         setSaveStatus("saving");
-         try {
-           const isValid = await form.trigger();
-   
-           if (!isValid) {
-             setSaveStatus("error");
-             return;
-           }
-   
-           const rawValues = form.getValues();
+      form.reset(newValues);
+    }
+  }, [resumeData.personalInfo, form]);
 
-           console.log("rawValues", rawValues)
-           setResumeData((prev) => ({
-            ...prev,
-            personalInfo: {
-              ...prev.personalInfo,
-              ...rawValues, 
-            },
-          }));
-          
-           setSaveStatus("saved");
-         } catch (error) {
-           console.error("Error saving general info:", error);
-           setSaveStatus("error");
-         }
-       }, 2000);
-     });
-   
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+      timeoutRef.current = setTimeout(async () => {
+        setSaveStatus("saving");
+
+        try {
+          const isValid = await form.trigger(name);
+
+          if (!isValid) return;
+
+          const rawValues = form.getValues();
+          const currentValues = resumeData.personalInfo;
+
+          // Only update if values have actually changed
+          const hasChanges = Object.keys(rawValues).some(
+            (key) => rawValues[key] !== currentValues?.[key]
+          );
+
+          if (hasChanges) {
+            setResumeData((prev) => ({
+              ...prev,
+              personalInfo: {
+                ...prev.personalInfo,
+                ...rawValues,
+              },
+            }));
+            setSaveStatus("saved");
+          } else {
+            setSaveStatus(null);
+          }
+        } catch (error) {
+          setSaveStatus("error");
+          console.error("Error saving personal info:", error);
+        }
+      }, 1000);
+    });
 
     return () => {
       subscription.unsubscribe();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [form, setResumeData]);
-  
+  }, [form, resumeData.personalInfo, setResumeData]);
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div className="space-y-1.5 text-center">
         <h2 className="text-2xl font-semibold">Personal info</h2>
         <p className="text-sm text-muted-foreground">Tell us about yourself.</p>
-        {/* {saveStatus === "saving" && (
+        {saveStatus === "saving" && (
           <p className="text-xs text-amber-500">Saving...</p>
         )}
         {saveStatus === "saved" && (
@@ -92,7 +113,7 @@ export default function PersonalInfoForm() {
           <p className="text-xs text-red-500">
             Validation error - please check form fields
           </p>
-        )} */}
+        )}
       </div>
 
       <Form {...form}>
@@ -111,11 +132,11 @@ export default function PersonalInfoForm() {
                       accept="image/*"
                       ref={(el) => {
                         photoInputRef.current = el;
-                        fieldProps.ref?.(el); // connect with RHF
+                        fieldProps.ref?.(el);
                       }}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
-                        onChange(file); // Let react-hook-form handle the value
+                        onChange(file);
                       }}
                     />
                   </FormControl>
@@ -126,7 +147,7 @@ export default function PersonalInfoForm() {
                       if (photoInputRef.current) {
                         photoInputRef.current.value = "";
                       }
-                      onChange(null); // Clear the value in react-hook-form
+                      onChange(null);
                     }}
                   >
                     Remove
@@ -145,7 +166,7 @@ export default function PersonalInfoForm() {
                 <FormItem>
                   <FormLabel>First name</FormLabel>
                   <FormControl>
-                    <Input placeholder="John" autoFocus  {...field} />
+                    <Input placeholder="John" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -230,7 +251,11 @@ export default function PersonalInfoForm() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="johndoe@email.com" {...field} type="email" />
+                  <Input
+                    placeholder="johndoe@email.com"
+                    {...field}
+                    type="email"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

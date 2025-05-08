@@ -16,60 +16,79 @@ import { Input } from "@/components/ui/input";
 import { useResumeStore } from "@/stores/useResumeStore";
 
 const GeneralInfoForm = () => {
-    const {resumeData, setResumeData} = useResumeStore();
-  
+  const { resumeData, setResumeData } = useResumeStore();
+  const timeoutRef = useRef();
+
   const form = useForm({
     resolver: zodResolver(generalInfoSchema),
     defaultValues: {
-      title: resumeData.title || "",
-      description: resumeData.description || "",
+      title: resumeData.generalInfo?.title || "",
+      description: resumeData.generalInfo?.description || "",
     },
+    mode: "onChange",
   });
 
   const [saveStatus, setSaveStatus] = useState(null);
- 
-  const timeoutRef = useRef();
 
-  // Auto-save whenever form values change
+  // Reset form when data changes
+  useEffect(() => {
+    if (resumeData.generalInfo) {
+      const newValues = {
+        title: resumeData.generalInfo.title || "",
+        description: resumeData.generalInfo.description || "",
+      };
 
+      form.reset(newValues);
+    }
+  }, [resumeData.generalInfo, form]);
+
+  // Handle form changes and auto-save
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-  
+
       timeoutRef.current = setTimeout(async () => {
         setSaveStatus("saving");
         try {
           const isValid = await form.trigger();
-  
+
           if (!isValid) {
             setSaveStatus("error");
             return;
           }
-  
+
           const rawValues = form.getValues();
-          setResumeData((prev) => ({
-            ...prev,
-            generalInfo: {
-              ...prev.generalInfo,
-              ...rawValues, 
-            },
-          }));
-          
-          setSaveStatus("saved");
+          const currentValues = resumeData.generalInfo;
+
+          // Only update if values have actually changed
+          const hasChanges = Object.keys(rawValues).some(
+            (key) => rawValues[key] !== currentValues?.[key]
+          );
+
+          if (hasChanges) {
+            setResumeData((prev) => ({
+              ...prev,
+              generalInfo: {
+                ...prev.generalInfo,
+                ...rawValues,
+              },
+            }));
+            setSaveStatus("saved");
+          } else {
+            setSaveStatus(null);
+          }
         } catch (error) {
           console.error("Error saving general info:", error);
           setSaveStatus("error");
         }
-      }, 2000);
+      }, 500);
     });
-  
+
     return () => {
       subscription.unsubscribe();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [form, setResumeData]);
-  
-  
+  }, [form, resumeData.generalInfo, setResumeData]);
 
   return (
     <div className="max-w-xl mx-auto space-y-6">
@@ -78,18 +97,8 @@ const GeneralInfoForm = () => {
         <p className="text-sm text-muted-foreground">
           This will not appear on your resume.
         </p>
-        {/* {saveStatus === "saving" && (
-          <p className="text-xs text-amber-500">Saving...</p>
-        )}
-        {saveStatus === "saved" && (
-          <p className="text-xs text-green-500">All changes saved</p>
-        )}
-        {saveStatus === "error" && (
-          <p className="text-xs text-red-500">
-            Validation error - please check form fields
-          </p>
-        )} */}
       </div>
+
       <Form {...form}>
         <form className="space-y-2">
           <FormField
@@ -99,12 +108,13 @@ const GeneralInfoForm = () => {
               <FormItem>
                 <FormLabel>Project Name</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="My Cool Resume" autoFocus />
+                  <Input {...field} placeholder="My Cool Resume"   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="description"

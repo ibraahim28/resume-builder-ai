@@ -21,13 +21,22 @@ const SummaryForm = () => {
     resolver: zodResolver(summarySchema),
     defaultValues: {
       summary: resumeData.summary?.summary || "",
-    }
-    
-    
+    },
+    mode: "onChange",
   });
 
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState(null);
+
+  useEffect(() => {
+    if (resumeData.summary) {
+      const newValues = {
+        summary: resumeData.summary.summary || "",
+      };
+
+      form.reset(newValues);
+    }
+  }, [resumeData.summary, form]);
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
@@ -36,7 +45,7 @@ const SummaryForm = () => {
       timeoutRef.current = setTimeout(async () => {
         setSaveStatus("saving");
         try {
-          const isValid = await form.trigger(); 
+          const isValid = await form.trigger();
 
           if (!isValid) {
             setSaveStatus("error");
@@ -44,29 +53,37 @@ const SummaryForm = () => {
           }
 
           const rawValues = form.getValues();
-          setResumeData((prev) => ({
-            ...prev,
-            summary: {
-              ...prev.summary,
-              ...rawValues, 
-            },
-          }));
-          
+          const currentValues = resumeData.summary;
 
-          console.log(rawValues);
-          setSaveStatus("saved");
+          // Only update if values have actually changed
+          const hasChanges = Object.keys(rawValues).some(
+            (key) => rawValues[key] !== currentValues?.[key]
+          );
+
+          if (hasChanges) {
+            setResumeData((prev) => ({
+              ...prev,
+              summary: {
+                ...prev.summary,
+                ...rawValues,
+              },
+            }));
+            setSaveStatus("saved");
+          } else {
+            setSaveStatus(null);
+          }
         } catch (error) {
-          console.error("Error saving work experiences:", error);
+          console.error("Error saving summary:", error);
           setSaveStatus("error");
         }
-      }, 2000); // 2 seconds debounce
+      }, 1000);
     });
 
     return () => {
       subscription.unsubscribe();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [form, setResumeData]);
+  }, [form, resumeData.summary, setResumeData]);
 
   return (
     <div className="max-w-xl mx-auto space-y-6">
@@ -75,6 +92,17 @@ const SummaryForm = () => {
         <p className="text-sm text-muted-foreground">
           Create a compelling summary of your qualifications and experience.
         </p>
+        {saveStatus === "saving" && (
+          <p className="text-xs text-amber-500">Saving...</p>
+        )}
+        {saveStatus === "saved" && (
+          <p className="text-xs text-green-500">All changes saved</p>
+        )}
+        {saveStatus === "error" && (
+          <p className="text-xs text-red-500">
+            Validation error - please check form fields
+          </p>
+        )}
       </div>
       <Form {...form}>
         <form className="space-y-4">
@@ -101,7 +129,6 @@ const SummaryForm = () => {
                     {...field}
                     placeholder="Experienced software developer with 5+ years of expertise in web development..."
                     rows={6}
-                    autoFocus
                   />
                 </FormControl>
                 <FormDescription>

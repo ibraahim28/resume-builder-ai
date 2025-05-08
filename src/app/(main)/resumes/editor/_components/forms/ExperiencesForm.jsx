@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { projectsSchema, workExperienceSchema } from "@/lib/formValidations";
@@ -12,6 +12,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,12 +31,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import toast from "react-hot-toast";
 
 export default function ExperiencesForm() {
-  const { resumeData, setResumeData, hasWorkExperience, setHasWorkExperience } =
-    useResumeStore();
+  const {
+    resumeData,
+    setResumeData,
+    hasWorkExperience,
+    setHasWorkExperience,
+  } = useResumeStore();
 
   const timeoutRef = useRef();
+  const [saveStatus, setSaveStatus] = useState(null);
 
   const defaultWorkExperiences = [
     {
@@ -65,7 +72,6 @@ export default function ExperiencesForm() {
     resolver: zodResolver(
       hasWorkExperience ? workExperienceSchema : projectsSchema
     ),
-
     defaultValues: hasWorkExperience
       ? {
           workExperiences:
@@ -75,63 +81,98 @@ export default function ExperiencesForm() {
       : {
           projects: resumeData.project?.projects || defaultProjects,
         },
+    mode: "onChange",
   });
+
+  useEffect(() => {
+    const newValues = hasWorkExperience
+      ? {
+          workExperiences:
+            resumeData?.workExperience?.workExperiences ||
+            defaultWorkExperiences,
+        }
+      : {
+          projects: resumeData?.project?.projects || defaultProjects,
+        };
+
+    form.reset(newValues);
+  }, [hasWorkExperience, form, resumeData]);
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+      timeoutRef.current = setTimeout(async () => {
+        setSaveStatus("saving");
+        try {
+          const isValid = await form.trigger();
+
+          if (!isValid) {
+            setSaveStatus("error");
+            return;
+          }
+
+          const rawValues = form.getValues();
+          const currentValues = hasWorkExperience
+            ? resumeData.workExperience
+            : resumeData.project;
+
+          const hasChanges = hasWorkExperience
+            ? JSON.stringify(rawValues.workExperiences) !==
+              JSON.stringify(currentValues?.workExperiences)
+            : JSON.stringify(rawValues.projects) !==
+              JSON.stringify(currentValues?.projects);
+
+          if (hasChanges) {
+            setResumeData((prev) => {
+              if (hasWorkExperience) {
+                return {
+                  ...prev,
+                  workExperience: {
+                    ...prev.workExperience,
+                    workExperiences: rawValues.workExperiences,
+                  },
+                };
+              } else {
+                return {
+                  ...prev,
+                  project: {
+                    ...prev.project,
+                    projects: rawValues.projects,
+                  },
+                };
+              }
+            });
+            setSaveStatus("saved");
+          } else {
+            setSaveStatus(null);
+          }
+        } catch (error) {
+          console.error("Error saving experiences:", error);
+          setSaveStatus("error");
+        }
+      }, 1000);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [form, resumeData, hasWorkExperience, setResumeData]);
 
   const { fields, append, remove, swap } = useFieldArray({
     control: form.control,
     name: hasWorkExperience ? "workExperiences" : "projects",
   });
 
-  useEffect(() => {
-    const subscription = form.watch((values) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
-      
-      console.log("Form Values:", values);
-
-      timeoutRef.current = setTimeout(async () => {
-        const isValid = await form.trigger();
-        if (!isValid) return;
-
-        setResumeData((prev) => {
-          if (hasWorkExperience) {
-            
-            return {
-              ...prev,
-              workExperience: {
-                ...prev.workExperience, 
-                workExperiences: values.workExperiences || [], 
-              },
-            };
-          } else {
-             
-            return {
-              ...prev,
-              project: { 
-                ...prev.project, 
-                projects: values.projects || [], 
-              },
-            };
-          }
-        });
-         console.log("Updated Resume Data:", useResumeStore.getState().resumeData);
-      }, 2000);
-    });
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeoutRef.current);
-    };
-  }, [form, setResumeData, hasWorkExperience]);
-
   const handleToggleExperience = () => {
     const projects = form.getValues("projects") || [];
     if (!isFormEmpty(projects)) {
-      alert("Please clear your projects before switching.");
+      toast.error("Please clear your projects before switching.");
       return;
     }
 
     setHasWorkExperience(true);
-
     form.reset({
       workExperiences:
         resumeData.workExperience?.workExperiences || defaultWorkExperiences,
@@ -140,14 +181,12 @@ export default function ExperiencesForm() {
 
   const handleToggleProjects = () => {
     const workExperiences = form.getValues("workExperiences") || [];
-
     if (!isFormEmpty(workExperiences)) {
-      alert("Please clear your work experience before switching.");
+      toast.error("Please clear your work experience before switching.");
       return;
     }
 
     setHasWorkExperience(false);
-
     form.reset({
       projects: resumeData.project?.projects || defaultProjects,
     });
@@ -167,6 +206,17 @@ export default function ExperiencesForm() {
             ? "Add your work history and professional experience"
             : "Add projects to highlight your skills and portfolio"}
         </p>
+        {saveStatus === "saving" && (
+          <p className="text-xs text-amber-500">Saving...</p>
+        )}
+        {saveStatus === "saved" && (
+          <p className="text-xs text-green-500">All changes saved</p>
+        )}
+        {saveStatus === "error" && (
+          <p className="text-xs text-red-500">
+            Validation error - please check form fields
+          </p>
+        )}
       </div>
 
       <div className="flex justify-center gap-4">
@@ -248,7 +298,11 @@ export default function ExperiencesForm() {
                           <FormItem>
                             <FormLabel>Start Date</FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="Jan 2023" />
+                              <Input
+                                {...field}
+                                type={"date"}
+                                placeholder="Jan 2023"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -261,7 +315,11 @@ export default function ExperiencesForm() {
                           <FormItem>
                             <FormLabel>End Date</FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="Dec 2024" />
+                              <Input
+                                {...field}
+                                type={"date"}
+                                placeholder="Dec 2024"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -274,13 +332,22 @@ export default function ExperiencesForm() {
                     control={form.control}
                     name={`projects.${index}.projectLink`}
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Project Link</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="https://yourapp.com" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      <>
+                        <FormItem>
+                          <FormLabel>Project Link</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="https://yourapp.com"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                        <FormDescription>
+                          This link will be attached to the title of yout
+                          project.
+                        </FormDescription>
+                      </>
                     )}
                   />
                 )}

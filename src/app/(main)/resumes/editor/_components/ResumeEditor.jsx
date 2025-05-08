@@ -3,13 +3,9 @@ import { steps } from "./forms/steps";
 import StepBreadcrumbs from "./StepBreadcrumbs";
 import { useSearchParams } from "next/navigation";
 import Footer from "./Footer";
-import { useState } from "react";
 import ResumePreviewSection from "@/components/ResumePreviewSection";
-
-const ResumeEditor = () => {
+const ResumeEditor = () => {  
   const searchParams = useSearchParams();
-
-  const [resumeData, setResumeData] = useState({});
 
   const currentStep = searchParams.get("step") || steps[0]?.key;
 
@@ -24,6 +20,7 @@ const ResumeEditor = () => {
   )?.component;
 
   return (
+
     <div className="flex flex-col h-[calc(100vh-64px)]">
       <header className="border-b px-3 py-5 text-center shrink-0 space-y-1.5">
         <h2 className="text-3xl font-bold text-blue-950">Design your resume</h2>
@@ -41,17 +38,12 @@ const ResumeEditor = () => {
               setCurrentStep={setCurrentStep}
             />
 
-            {CurrentFormComponent && (
-              <CurrentFormComponent
-                resumeData={resumeData}
-                setResumeData={setResumeData}
-              />
-            )}
+            {CurrentFormComponent && <CurrentFormComponent />}
           </div>
         </div>
 
         <div className="grow md:border-r" />
-       <ResumePreviewSection resumeData={resumeData} setResumeData={setResumeData} />
+        <ResumePreviewSection />
       </main>
 
       <Footer currentStep={currentStep} setCurrentStep={setCurrentStep} />

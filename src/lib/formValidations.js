@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 
 export const optionalString = z.string().trim().optional().or(z.literal(""));
@@ -11,22 +10,14 @@ export const generalInfoSchema = z.object({
 export const personalInfoSchema = z.object({
   photo: z
     .custom()
-    .refine(
-      (file) => !file || file instanceof File,
-      "Photo must be a valid file"
-    )
+    .refine((file) => !file || file instanceof File, "Photo must be a valid file")
     .refine(
       (file) =>
         !file ||
-        ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(
-          file.type
-        ),
+        ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type),
       "Photo must be a JPEG, PNG, GIF, or WEBP image"
     )
-    .refine(
-      (file) => !file || file.size <= 4 * 1024 * 1024,
-      "Photo must be less than 4MB"
-    )
+    .refine((file) => !file || file.size <= 4 * 1024 * 1024, "Photo must be less than 4MB")
     .optional(),
   firstName: optionalString,
   lastName: optionalString,
@@ -68,14 +59,13 @@ export const projectsSchema = z.object({
   projects: z
     .array(
       z.object({
-        title: optionalString, 
-        projectLink: optionalString, 
+        title: optionalString,
+        projectLink: optionalString,
         description: optionalString,
       })
     )
     .optional(),
 });
-
 
 export const skillsSchema = z.object({
   skills: z.array(z.string().trim()).optional(),
@@ -85,14 +75,19 @@ export const summarySchema = z.object({
   summary: optionalString,
 });
 
+export const appearanceSchema = z.object({
+  colorHex: optionalString,
+  borderStyle: optionalString,
+});
+
+
 export const resumeSchema = z.object({
-  ...generalInfoSchema.shape,
-  ...personalInfoSchema.shape,
-  ...workExperienceSchema.shape,
-  ...projectsSchema.shape,
-  ...educationSchema.shape,
-  ...skillsSchema.shape,
-  ...summarySchema.shape,
-  colorHex : optionalString,
-  borderStyle : optionalString,
+  generalInfo: generalInfoSchema,
+  personalInfo: personalInfoSchema,
+  education: educationSchema,
+  workExperience: workExperienceSchema,
+  project: projectsSchema,
+  skills: skillsSchema,
+  summary: summarySchema,
+  appearance: appearanceSchema,
 });

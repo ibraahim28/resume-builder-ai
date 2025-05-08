@@ -31,7 +31,7 @@ const EducationForm = () => {
   const form = useForm({
     resolver: zodResolver(educationSchema),
     defaultValues: {
-      educations: resumeData.educations || [
+      educations: resumeData?.education?.educations || [
         {
           degree: "",
           school: "",
@@ -40,6 +40,7 @@ const EducationForm = () => {
         },
       ],
     },
+    mode: "onChange",
   });
 
   const { fields, append, remove, swap } = useFieldArray({
@@ -48,42 +49,68 @@ const EducationForm = () => {
   });
 
   useEffect(() => {
+    if (resumeData.education) {
+      const newValues = {
+        educations: resumeData?.education?.educations || [
+          {
+            degree: "",
+            school: "",
+            startDate: "",
+            endDate: "",
+          },
+        ],
+      };
+
+      form.reset(newValues);
+    }
+  }, [resumeData.education, form]);
+
+  useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-  
+
       timeoutRef.current = setTimeout(async () => {
         setSaveStatus("saving");
         try {
           const isValid = await form.trigger();
-  
+
           if (!isValid) {
             setSaveStatus("error");
             return;
           }
-  
+
           const rawValues = form.getValues();
-          setResumeData((prev) => ({
-            ...prev,
-            education: {
-              ...prev.education,
-              educations : rawValues.educations, 
-            },
-          }));
-          
-          setSaveStatus("saved");
-          console.log("ResumeData:", resumeData);
+          const currentValues = resumeData.education;
+
+          // Only update if values have actually changed
+          const hasChanges =
+            JSON.stringify(rawValues.educations) !==
+            JSON.stringify(currentValues?.educations);
+
+          if (hasChanges) {
+            setResumeData((prev) => ({
+              ...prev,
+              education: {
+                ...prev.education,
+                educations: rawValues.educations,
+              },
+            }));
+            setSaveStatus("saved");
+          } else {
+            setSaveStatus(null);
+          }
         } catch (error) {
-          console.error("Error saving general info:", error);
+          console.error("Error saving education:", error);
           setSaveStatus("error");
         }
-      }, 2000);
+      }, 1000);
     });
-  
+
     return () => {
       subscription.unsubscribe();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [form, setResumeData]);
+  }, [form, resumeData.education, setResumeData]);
 
   const addNewEducation = () => {
     append({
@@ -101,6 +128,17 @@ const EducationForm = () => {
         <p className="text-sm text-muted-foreground">
           Add your educational background
         </p>
+        {saveStatus === "saving" && (
+          <p className="text-xs text-amber-500">Saving...</p>
+        )}
+        {saveStatus === "saved" && (
+          <p className="text-xs text-green-500">All changes saved</p>
+        )}
+        {saveStatus === "error" && (
+          <p className="text-xs text-red-500">
+            Validation error - please check form fields
+          </p>
+        )}
       </div>
       <Form {...form}>
         <form className="space-y-6">
@@ -119,7 +157,7 @@ const EducationForm = () => {
                     <FormItem>
                       <FormLabel>Degree</FormLabel>
                       <FormControl>
-                        <Input {...field} autoFocus placeholder="Bachelor of Science" />
+                        <Input {...field} placeholder="Bachelor of Science" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -146,7 +184,11 @@ const EducationForm = () => {
                       <FormItem>
                         <FormLabel>Start Date</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Sep 2020" />
+                          <Input
+                            {...field}
+                            type={"date"}
+                            placeholder="Sep 2020"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -159,7 +201,11 @@ const EducationForm = () => {
                       <FormItem>
                         <FormLabel>End Date</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Jun 2022" />
+                          <Input
+                            {...field}
+                            type={"date"}
+                            placeholder="Jun 2022"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

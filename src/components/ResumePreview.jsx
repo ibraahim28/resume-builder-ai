@@ -3,6 +3,8 @@ import { useRef } from "react";
 import PersonalInfoPreviewSection from "./PersonalInfoPreviewSection";
 import SummaryPreviewSection from "./SummaryPreviewSection";
 import ExperiencesPreviewSection from "./ExperiencesPreviewSection";
+import EducationPreviewSection from "./EducationPreviewSection";
+import SkillsPreviewSection from "./SkillsPreviewSection";
 
 const { cn } = require("@/lib/utils");
 
@@ -27,6 +29,8 @@ const ResumePreview = ({ classname }) => {
         <PersonalInfoPreviewSection />
         <SummaryPreviewSection />
         <ExperiencesPreviewSection />
+        <EducationPreviewSection />
+        <SkillsPreviewSection />
       </div>
     </div>
   );

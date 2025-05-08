@@ -8,6 +8,8 @@ const PersonalInfoPreviewSection = () => {
   const { photo, firstName, lastName, jobTitle, city, country, phone, email } =
     resumeData.personalInfo;
 
+  const { colorHex } = resumeData?.appearance;
+
   const [photoSrc, setPhotoSrc] = useState(photo instanceof File ? "" : photo);
 
   useEffect(() => {
@@ -34,10 +36,23 @@ const PersonalInfoPreviewSection = () => {
       )}
       <div className="space-y-2.5">
         <div className="space-y-1">
-          <p className="text-3xl font-bold">
+          <p
+            style={{
+              color: colorHex,
+            }}
+            className="text-3xl font-bold"
+          >
             {firstName} {lastName}
           </p>
-          <p className="font-medium"> {jobTitle} </p>
+          <p
+            className="font-medium"
+            style={{
+              color: colorHex,
+            }}
+          >
+            {" "}
+            {jobTitle}{" "}
+          </p>
         </div>
         <p className="text-xs text-gray-500">
           {city}

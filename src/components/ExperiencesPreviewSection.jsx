@@ -1,11 +1,13 @@
 import { useResumeStore } from "@/stores/useResumeStore";
 import React from "react";
+import { formatDate } from "date-fns";
 
 const ExperiencesPreviewSection = () => {
   const { resumeData, hasWorkExperience } = useResumeStore();
 
-  const { workExperiences = [] } = resumeData.workExperience || {};
-  const { projects = [] } = resumeData.projects || {};
+  const { workExperiences = [] } = resumeData?.workExperience || {};
+  const { projects = [] } = resumeData?.project || {};
+  const { colorHex } = resumeData?.appearance;
 
   const getNonEmptyExperiences = (list = []) =>
     list.filter((exp) => exp && Object.values(exp).some(Boolean));
@@ -15,24 +17,60 @@ const ExperiencesPreviewSection = () => {
     : getNonEmptyExperiences(projects);
 
   if (!experiences.length) return null;
-  
+
   return (
     <>
-      <hr className="border-2" />
+      <hr
+        className="border-2"
+        style={{
+          borderColor: colorHex,
+        }}
+      />
       <div className="space-y-3">
-        <p className="text-lg font-semibold">
+        <p
+          className="text-lg font-semibold"
+          style={{
+            color: colorHex,
+          }}
+        >
           {hasWorkExperience ? "Work Experiences" : "Projects"}
         </p>
         {experiences.map((exp, idx) => (
           <div key={idx} className="break-inside-avoid space-y-1">
             <div className="flex items-center justify-between text-sm font-semibold">
-              <p>{exp.position }</p>
-              <p className="text-xs font-normal text-gray-500">
-                {exp.company }
-              </p>
+              {hasWorkExperience ? (
+                <p
+                  style={{
+                    color: colorHex,
+                  }}
+                >
+                  {" "}
+                  {exp.position}{" "}
+                </p>
+              ) : (
+                <p className={exp.projectLink ? "text-blue-500" : ""}>
+                  {" "}
+                  {exp.projectLink ? (
+                    <a href={exp.projectLink}>{exp.title}</a>
+                  ) : (
+                    exp.title
+                  )}{" "}
+                </p>
+              )}
+              {exp.startDate && (
+                <span>
+                  {formatDate(exp.startDate, "MM/yyyy")} -{" "}
+                  {exp.endDate ? formatDate(exp.endDate, "MM/yyyy") : "Present"}
+                </span>
+              )}
             </div>
+            {exp.company && (
+              <p className="text-xs font-normal text-gray-500">{exp.company}</p>
+            )}
             {exp.description && (
-              <p className="text-sm text-muted-foreground">{exp.description}</p>
+              <p className="text-sm whitespace-pre-line text-muted-foreground">
+                {exp.description}
+              </p>
             )}
           </div>
         ))}

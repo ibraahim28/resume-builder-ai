@@ -60,7 +60,7 @@ const SkillsForm = () => {
            console.error("Error saving general info:", error);
            setSaveStatus("error");
          }
-       }, 2000);
+       }, 1000);
      });
    
      return () => {
@@ -105,7 +105,7 @@ const SkillsForm = () => {
               <FormLabel>Add Skill</FormLabel>
               <FormControl>
                 <Input
-                  autoFocus
+                   
                   value={newSkill}
                   onChange={(e) => setNewSkill(e.target.value)}
                   onKeyDown={handleKeyDown}
