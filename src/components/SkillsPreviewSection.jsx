@@ -1,10 +1,11 @@
 import { useResumeStore } from "@/stores/useResumeStore";
 import React from "react";
 import { Badge } from "./ui/badge";
+import { BorderStyles } from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
 
 const SkillsPreviewSection = () => {
   const { skills } = useResumeStore()?.resumeData?.skills;
-  const { colorHex } = useResumeStore()?.resumeData?.appearance;
+  const { colorHex, borderStyle } = useResumeStore()?.resumeData?.appearance;
   if (!skills.length) return null;
   return (
     <>
@@ -30,6 +31,12 @@ const SkillsPreviewSection = () => {
               className="text-sm rounded-md text-white"
               style={{
                 backgroundColor: colorHex,
+                borderRadius:
+                  borderStyle === BorderStyles.SQUARE
+                    ? "0px"
+                    : borderStyle === BorderStyles.CIRCLE
+                      ? "999px"
+                      : "8px",
               }}
             >
               {skill}

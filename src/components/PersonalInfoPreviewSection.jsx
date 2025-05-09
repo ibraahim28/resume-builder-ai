@@ -1,3 +1,4 @@
+import { BorderStyles } from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
 import { useResumeStore } from "@/stores/useResumeStore";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
@@ -6,23 +7,27 @@ const PersonalInfoPreviewSection = () => {
   const { resumeData } = useResumeStore();
 
   const { photo, firstName, lastName, jobTitle, city, country, phone, email } =
-    resumeData.personalInfo;
+    resumeData?.personalInfo;
 
-  const { colorHex } = resumeData?.appearance;
+  const { colorHex, borderStyle } = resumeData?.appearance;
 
-  const [photoSrc, setPhotoSrc] = useState(photo instanceof File ? "" : photo);
+  const [photoSrc, setPhotoSrc] = useState("");
 
   useEffect(() => {
-    const objectUrl = photo instanceof File ? URL.createObjectURL(photo) : "";
+    if (!photo) {
+      setPhotoSrc("");
+      return;
+    }
 
-    if (objectUrl) setPhotoSrc(objectUrl);
-
-    if (photo === null) setPhotoSrc("");
-
-    return () => {
-      URL.revokeObjectURL(objectUrl);
-    };
+    if (photo instanceof File) {
+      const objectUrl = URL.createObjectURL(photo);
+      setPhotoSrc(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    } else if (typeof photo === "string") {
+      setPhotoSrc(photo);
+    }
   }, [photo]);
+
   return (
     <div className="flex items-center gap-6">
       {photoSrc && (
@@ -32,6 +37,14 @@ const PersonalInfoPreviewSection = () => {
           height={100}
           alt="Authors photo"
           className="aspect-square object-cover"
+          style={{
+            borderRadius:
+              borderStyle === BorderStyles.SQUARE
+                ? "0px"
+                : borderStyle === BorderStyles.CIRCLE
+                  ? "999px"
+                  : "10px",
+          }}
         />
       )}
       <div className="space-y-2.5">

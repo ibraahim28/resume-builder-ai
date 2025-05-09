@@ -5,7 +5,7 @@ import { Palette } from "lucide-react";
 import React, { useState } from "react";
 import { TwitterPicker } from "react-color";
 
-const ColorPicker = () => {
+const  ColorPicker = () => {
   const { resumeData, setResumeData } = useResumeStore();
 
   const {colorHex} = resumeData?.appearance;
@@ -24,6 +24,7 @@ const ColorPicker = () => {
     <Popover className="bg-white text-black" open={showPopover} onOpenChange={setShowPopover}>
       <PopoverTrigger asChild>
         <Button
+        className="cursor-pointer"
         variant="outline"
         size="icon"
         title="Change resume color"

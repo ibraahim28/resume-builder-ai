@@ -10,14 +10,22 @@ export const generalInfoSchema = z.object({
 export const personalInfoSchema = z.object({
   photo: z
     .custom()
-    .refine((file) => !file || file instanceof File, "Photo must be a valid file")
+    .refine(
+      (file) => file === null || file instanceof File || typeof file === 'string',
+      "Photo must be a valid file or base64 string"
+    )
     .refine(
       (file) =>
-        !file ||
-        ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type),
+        file === null ||
+        (file instanceof File
+          ? ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)
+          : file.startsWith('data:image/')),
       "Photo must be a JPEG, PNG, GIF, or WEBP image"
     )
-    .refine((file) => !file || file.size <= 4 * 1024 * 1024, "Photo must be less than 4MB")
+    .refine(
+      (file) => file === null || (file instanceof File ? file.size <= 4 * 1024 * 1024 : true),
+      "Photo must be less than 4MB"
+    )
     .optional(),
   firstName: optionalString,
   lastName: optionalString,

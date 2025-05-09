@@ -24,11 +24,20 @@ const SkillsForm = () => {
 
   const form = useForm({
     resolver: zodResolver(skillsSchema),
-    defaultValues: resumeData?.skills || {
-      skills: [],
+    defaultValues: {
+      skills: resumeData.skills?.skills || [],
     },
   });
-  console.log(resumeData.skills);
+
+  // Reset form when data changes
+  useEffect(() => {
+    if (resumeData.skills) {
+      form.reset({
+        skills: resumeData.skills.skills || [],
+      });
+    }
+  }, [resumeData.skills, form]);
+
   const skills = form.watch("skills") || [];
 
   // Autosave effect with debounce

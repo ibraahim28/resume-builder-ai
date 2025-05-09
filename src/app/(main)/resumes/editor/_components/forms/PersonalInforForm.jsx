@@ -36,6 +36,15 @@ export default function PersonalInfoForm() {
     mode: "onChange",
   });
 
+  const convertFileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   useEffect(() => {
     if (resumeData.personalInfo) {
       const newValues = {
@@ -68,6 +77,17 @@ export default function PersonalInfoForm() {
           const rawValues = form.getValues();
           const currentValues = resumeData.personalInfo;
 
+          // Handle photo conversion if it's a File object
+          let photoValue = rawValues.photo;
+          if (photoValue instanceof File) {
+            try {
+              photoValue = await convertFileToBase64(photoValue);
+            } catch (error) {
+              console.error("Error converting photo to base64:", error);
+              return;
+            }
+          }
+
           // Only update if values have actually changed
           const hasChanges = Object.keys(rawValues).some(
             (key) => rawValues[key] !== currentValues?.[key]
@@ -79,6 +99,7 @@ export default function PersonalInfoForm() {
               personalInfo: {
                 ...prev.personalInfo,
                 ...rawValues,
+                photo: photoValue,
               },
             }));
             setSaveStatus("saved");
@@ -97,6 +118,20 @@ export default function PersonalInfoForm() {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [form, resumeData.personalInfo, setResumeData]);
+
+  const handleRemovePhoto = () => {
+    if (photoInputRef.current) {
+      photoInputRef.current.value = "";
+    }
+    form.setValue("photo", null);
+    setResumeData((prev) => ({
+      ...prev,
+      personalInfo: {
+        ...prev.personalInfo,
+        photo: null,
+      },
+    }));
+  };
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
@@ -136,23 +171,25 @@ export default function PersonalInfoForm() {
                       }}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
-                        onChange(file);
+                        if (file) {
+                          onChange(file);
+                        }
                       }}
                     />
                   </FormControl>
                   <Button
                     variant="secondary"
                     type="button"
-                    onClick={() => {
-                      if (photoInputRef.current) {
-                        photoInputRef.current.value = "";
-                      }
-                      onChange(null);
-                    }}
+                    onClick={handleRemovePhoto}
                   >
                     Remove
                   </Button>
                 </div>
+                {value && !(value instanceof File) && (
+                  <div className="mt-2">
+                    <p className="text-sm text-muted-foreground">Photo is saved</p>
+                  </div>
+                )}
                 <FormMessage />
               </FormItem>
             )}
