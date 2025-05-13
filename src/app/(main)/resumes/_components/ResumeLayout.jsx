@@ -1,10 +1,16 @@
+import { useResumeStore } from "@/stores/useResumeStore";
 import { Plus } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 
 const ResumeLayout = ({ data }) => {
-  const router = useRouter()
+  const { addResume } = useResumeStore();
+  const router = useRouter();
+  const addNewResume = () => {
+    addResume();
+    router.push("/resumes/editor");
+  };
   return (
     <div className="container mx-auto p-4">
       <div
@@ -12,7 +18,10 @@ const ResumeLayout = ({ data }) => {
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {/* Add New Resume */}
-        <div onClick={()=> router.push('/resumes/editor')} className="flex-shrink-0 w-40 md:w-48 lg:w-52 mr-4">
+        <div
+          onClick={() => addNewResume()}
+          className="flex-shrink-0 w-40 md:w-48 lg:w-52 mr-4"
+        >
           <div className="h-full bg-white rounded-lg shadow-md p-3 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow cursor-pointer border-2 border-dashed border-gray-300">
             <Plus size={80} className="text-gray-400" />
 

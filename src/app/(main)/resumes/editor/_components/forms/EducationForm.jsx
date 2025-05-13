@@ -26,7 +26,8 @@ import { useResumeStore } from "@/stores/useResumeStore";
 const EducationForm = () => {
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState(null);
-  const { resumeData, setResumeData } = useResumeStore();
+  const { resumes, currentResumeId, setResumeData } = useResumeStore();
+  const resumeData = resumes[currentResumeId] || {};
 
   const form = useForm({
     resolver: zodResolver(educationSchema),

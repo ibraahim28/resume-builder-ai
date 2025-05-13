@@ -17,9 +17,11 @@ import { useForm } from "react-hook-form";
 
 export default function PersonalInfoForm() {
   const photoInputRef = useRef(null);
-  const { resumeData, setResumeData } = useResumeStore();
+  const { resumes, currentResumeId, setResumeData } = useResumeStore();
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState("null");
+
+  const resumeData = resumes[currentResumeId] || {};
 
   const form = useForm({
     resolver: zodResolver(personalInfoSchema),
@@ -187,7 +189,9 @@ export default function PersonalInfoForm() {
                 </div>
                 {value && !(value instanceof File) && (
                   <div className="mt-2">
-                    <p className="text-sm text-muted-foreground">Photo is saved</p>
+                    <p className="text-sm text-muted-foreground">
+                      Photo is saved
+                    </p>
                   </div>
                 )}
                 <FormMessage />

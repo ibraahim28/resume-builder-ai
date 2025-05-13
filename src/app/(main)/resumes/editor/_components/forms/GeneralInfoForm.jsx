@@ -16,8 +16,10 @@ import { Input } from "@/components/ui/input";
 import { useResumeStore } from "@/stores/useResumeStore";
 
 const GeneralInfoForm = () => {
-  const { resumeData, setResumeData } = useResumeStore();
+  const { currentResumeId, resumes, setResumeData } = useResumeStore();
   const timeoutRef = useRef();
+
+const resumeData = resumes[currentResumeId] || {};
 
   const form = useForm({
     resolver: zodResolver(generalInfoSchema),
@@ -108,7 +110,7 @@ const GeneralInfoForm = () => {
               <FormItem>
                 <FormLabel>Project Name</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="My Cool Resume"   />
+                  <Input {...field} placeholder="My Cool Resume" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

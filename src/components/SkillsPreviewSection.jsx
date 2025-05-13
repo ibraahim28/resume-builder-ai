@@ -4,8 +4,11 @@ import { Badge } from "./ui/badge";
 import { BorderStyles } from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
 
 const SkillsPreviewSection = () => {
-  const { skills } = useResumeStore()?.resumeData?.skills;
-  const { colorHex, borderStyle } = useResumeStore()?.resumeData?.appearance;
+  const { resumes, currentResumeId } = useResumeStore();
+  const resumeData = resumes[currentResumeId] || {};
+
+  const skills = resumeData?.skills?.skills || [];
+  const { colorHex, borderStyle } = resumeData?.appearance || {};
   if (!skills.length) return null;
   return (
     <>

@@ -12,8 +12,11 @@ export const BorderStyles = {
 const borderStylesArray = Object.values(BorderStyles);
 
 const BorderStyleButton = () => {
-  const { setResumeData } = useResumeStore();
-  const { borderStyle } = useResumeStore()?.resumeData?.appearance;
+  const { setResumeData, resumes, currentResumeId } = useResumeStore();
+
+  const resumeData = resumes[currentResumeId] || {};
+
+  const { borderStyle } = resumeData?.appearance || "";
 
   const onChange = (borderStyle) => {
     setResumeData((prev) => ({

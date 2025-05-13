@@ -4,12 +4,21 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
 const PersonalInfoPreviewSection = () => {
-  const { resumeData } = useResumeStore();
+  const { resumes, currentResumeId } = useResumeStore();
+  const resumeData = resumes[currentResumeId] || {};
 
-  const { photo, firstName, lastName, jobTitle, city, country, phone, email } =
-    resumeData?.personalInfo;
+  const {
+    photo = null,
+    firstName = "",
+    lastName = "",
+    jobTitle = "",
+    city = "",
+    country = "",
+    phone = "",
+    email = "",
+  } = resumeData?.personalInfo || {};
 
-  const { colorHex, borderStyle } = resumeData?.appearance;
+  const { colorHex = "", borderStyle = "" } = resumeData?.appearance || {};
 
   const [photoSrc, setPhotoSrc] = useState("");
 

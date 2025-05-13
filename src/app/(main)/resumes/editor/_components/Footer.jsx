@@ -22,13 +22,11 @@ const Footer = ({ currentStep, setCurrentStep, showPreviewOnSmDevice, setShowPre
             onClick={
               previousStep ? () => setCurrentStep(previousStep) : undefined
             }
-            disabled={!previousStep || isButtonDisabled}
           >
             Previous step
           </Button>
           <Button
             onClick={nextStep ? () => setCurrentStep(nextStep) : undefined}
-            disabled={!nextStep || isButtonDisabled}
           >
             Next step
           </Button>
@@ -43,7 +41,7 @@ const Footer = ({ currentStep, setCurrentStep, showPreviewOnSmDevice, setShowPre
           {showPreviewOnSmDevice ? <PenLineIcon /> : <FileUserIcon />}
         </Button>
         <div className="flex items-center gap-3">
-          <Button asChild variant="secondary" disabled={isButtonDisabled}>
+          <Button asChild variant="secondary">
             <Link href="/resumes">Close Editor</Link>
           </Button>
         </div>

@@ -1,18 +1,41 @@
 "use client";
+
 import { steps } from "./forms/steps";
 import StepBreadcrumbs from "./StepBreadcrumbs";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Footer from "./Footer";
 import ResumePreviewSection from "@/components/ResumePreviewSection";
-const ResumeEditor = () => {  
+import { useResumeStore } from "@/stores/useResumeStore";
+import { useEffect } from "react";
+
+const ResumeEditor = () => {
+  const { currentResumeId, setCurrentResumeId, addResume } = useResumeStore();
   const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams.toString());
+  const router = useRouter();
 
   const currentStep = searchParams.get("step") || steps[0]?.key;
 
+  useEffect(() => {
+    const resumeId = searchParams.get("resumeId");
+    if (resumeId) {
+      setCurrentResumeId(resumeId);
+    } else if (currentResumeId) {
+      params.set("resumeId", currentResumeId);
+      router.replace(`?${params.toString()}`);
+    } else {
+      addResume();
+      params.set("resumeId", currentResumeId);
+      router.replace(`?${params.toString()}`);
+    }
+  }, [searchParams, currentResumeId]);
+
   const setCurrentStep = (key) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set("step", key);
-    window.history.pushState(null, "", `?${newSearchParams.toString()}`);
+    params.set("step", key);
+    if (!currentResumeId) return;
+    params.set("resumeId", currentResumeId);
+
+    router.replace(`?${params.toString()}`);
   };
 
   const CurrentFormComponent = steps.find(
@@ -20,7 +43,6 @@ const ResumeEditor = () => {
   )?.component;
 
   return (
-
     <div className="flex flex-col h-[calc(100vh-64px)]">
       <header className="border-b px-3 py-5 text-center shrink-0 space-y-1.5">
         <h2 className="text-3xl font-bold text-blue-950">Design your resume</h2>
@@ -37,7 +59,6 @@ const ResumeEditor = () => {
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
             />
-
             {CurrentFormComponent && <CurrentFormComponent />}
           </div>
         </div>

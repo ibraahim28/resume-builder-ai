@@ -16,7 +16,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useResumeStore } from "@/stores/useResumeStore";
 
 const SummaryForm = () => {
-  const { resumeData, setResumeData } = useResumeStore();
+  const { resumes, currentResumeId, setResumeData } = useResumeStore();
+
+  const resumeData = resumes[currentResumeId] || {};
+
   const form = useForm({
     resolver: zodResolver(summarySchema),
     defaultValues: {

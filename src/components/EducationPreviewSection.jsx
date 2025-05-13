@@ -3,8 +3,12 @@ import { formatDate } from "date-fns";
 import React from "react";
 
 const EducationPreviewSection = () => {
-  const { educations } = useResumeStore()?.resumeData?.education;
-  const { colorHex } = useResumeStore()?.resumeData?.appearance;
+  const { resumes, currentResumeId } = useResumeStore();
+  const resumeData = resumes[currentResumeId] || {};
+
+  const educations = resumeData?.education?.educations || [];
+  const { colorHex } = resumeData?.appearance || {};
+
   const educationsNotEmpty = educations.filter(
     (edu) => Object.values(edu).filter(Boolean).length > 0
   );

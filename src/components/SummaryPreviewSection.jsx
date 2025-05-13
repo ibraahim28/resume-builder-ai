@@ -2,10 +2,14 @@ import { useResumeStore } from "@/stores/useResumeStore";
 import React from "react";
 
 const SummaryPreviewSection = () => {
-  const { resumeData } = useResumeStore();
-  const { summary } = resumeData?.summary;
-  const {colorHex} = resumeData?.appearance;
+  const { resumes, currentResumeId } = useResumeStore();
+  const resumeData = resumes[currentResumeId] || {};
+
+  const { summary } = resumeData?.summary || {};
+  const { colorHex } = resumeData?.appearance || {};
+
   if (!summary) return null;
+
   return (
     <>
       <hr

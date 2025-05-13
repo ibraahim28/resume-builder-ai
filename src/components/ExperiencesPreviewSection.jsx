@@ -3,11 +3,12 @@ import React from "react";
 import { formatDate } from "date-fns";
 
 const ExperiencesPreviewSection = () => {
-  const { resumeData, hasWorkExperience } = useResumeStore();
+  const { resumes, currentResumeId, hasWorkExperience } = useResumeStore();
+  const resumeData = resumes[currentResumeId] || {};
 
-  const { workExperiences = [] } = resumeData?.workExperience || {};
-  const { projects = [] } = resumeData?.project || {};
-  const { colorHex } = resumeData?.appearance;
+  const workExperiences = resumeData?.workExperience?.workExperiences || [];
+  const projects = resumeData?.project?.projects || [];
+  const { colorHex } = resumeData?.appearance || {};
 
   const getNonEmptyExperiences = (list = []) =>
     list.filter((exp) => exp && Object.values(exp).some(Boolean));

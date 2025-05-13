@@ -35,11 +35,15 @@ import toast from "react-hot-toast";
 
 export default function ExperiencesForm() {
   const {
-    resumeData,
+    resumes,
+    currentResumeId,
     setResumeData,
     hasWorkExperience,
     setHasWorkExperience,
   } = useResumeStore();
+
+  const resumeData = resumes[currentResumeId] ||{};
+
 
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState(null);
