@@ -54,23 +54,28 @@ const defaultResumeData = {
     colorHex: "",
     borderStyle: "",
   },
+
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 };
 
 export const useResumeStore = create(
   persist(
     (set, get) => ({
-      resumes: {}, 
+      resumes: {},
       currentResumeId: null,
       hasWorkExperience: true,
       isSaving: false,
 
-      // Create new resume and set as current
       addResume: () => {
         const id = uuidv4();
+        const timestamp = new Date().toISOString();
         set((state) => ({
           resumes: {
             ...state.resumes,
             [id]: JSON.parse(JSON.stringify(defaultResumeData)),
+            createdAt: timestamp,
+            updatedAt: timestamp,
           },
           currentResumeId: id,
         }));
@@ -167,23 +172,32 @@ export const useResumeStore = create(
       setResumeData: (updateFn) => {
         const { currentResumeId, resumes } = get();
         if (!currentResumeId) return;
-
-        set((state) => ({
-          resumes: {
-            ...state.resumes,
-            [currentResumeId]: updateFn(state.resumes[currentResumeId]),
-          },
-        }));
+        set((state) => {
+          const updatedResume = updateFn(state.resumes[currentResumeId]);
+          return {
+            resumes: {
+              ...state.resumes,
+              [currentResumeId]: {
+                ...updatedResume,
+                updatedAt: new Date().toISOString(),
+              },
+            },
+          };
+        });
       },
 
       resetResumeData: () => {
         const { currentResumeId } = get();
         if (!currentResumeId) return;
-
+        const timestamp = new Date().toISOString();
         set((state) => ({
           resumes: {
             ...state.resumes,
-            [currentResumeId]: JSON.parse(JSON.stringify(defaultResumeData)),
+            [currentResumeId]: {
+              ...JSON.parse(JSON.stringify(defaultResumeData)),
+              createdAt: state.resumes[currentResumeId].createdAt,
+              updatedAt: timestamp,
+            },
           },
         }));
       },

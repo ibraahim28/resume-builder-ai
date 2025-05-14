@@ -3,56 +3,17 @@ import { Button } from "@/components/ui/button";
 import { AlarmClock } from "lucide-react";
 import React, { useState } from "react";
 import ResumeLayout from "./ResumeLayout";
+import { useResumeStore } from "@/stores/useResumeStore";
 
 
 
 const MyResume = () => {
   const [selectedMode, setSelectedMode] = useState("draft");
+  const {resumes} = useResumeStore();
 
-  const completedResume = [
-    {
-    title : "Untitled Resume",
-    image : "/resume.jpeg",
-    lastUpdated : "10 days ago",
-  },
-    {
-    title : "Untitled Resume",
-    image : "/resume.jpeg",
-    lastUpdated : "3 days ago",
-  },
-    {
-    title : "Web Dev Resume",
-    image : "/resume.jpeg",
-    lastUpdated : "3 hours ago",
-  },
-    {
-    title : "Professional Resume",
-    image : "/resume.jpeg",
-    lastUpdated : "4 days ago",
-  },
-]
-  const draftResume = [
-    {
-    title : "Untitled Resume",
-    image : "/resume.jpeg",
-    lastUpdated : "2 days ago",
-  },
-    {
-    title : "Untitled Resume",
-    image : "/resume.jpeg",
-    lastUpdated : "3 days ago",
-  },
-    {
-    title : "Web Dev Resume",
-    image : "/resume.jpeg",
-    lastUpdated : "3 hours ago",
-  },
-    {
-    title : "Untitled Resume",
-    image : "/resume.jpeg",
-    lastUpdated : "4 days ago",
-  },
-]
+  const resumesArr = Object.keys(resumes);
+
+  
 
   return (
     <div >
@@ -86,7 +47,7 @@ const MyResume = () => {
         </div>
       </div>
       {
-        selectedMode === 'draft' ? (<ResumeLayout data={draftResume} />) : (<ResumeLayout data={completedResume} />)
+        selectedMode === 'draft' ? (<ResumeLayout resumeIdArr={resumesArr} />) : (<ResumeLayout resumeIdArr={resumesArr} />)
       }
     </div>
   );
