@@ -3,8 +3,15 @@ import Link from "next/link";
 import React from "react";
 import { steps } from "./forms/steps";
 import { FileUserIcon, PenLineIcon } from "lucide-react";
+import { useResumeStore } from "@/stores/useResumeStore";
 
-const Footer = ({ currentStep, setCurrentStep, showPreviewOnSmDevice, setShowPreviewOnSmDevice }) => {
+const Footer = ({
+  currentStep,
+  setCurrentStep,
+  showPreviewOnSmDevice,
+  setShowPreviewOnSmDevice,
+  setCurrentResumeId
+}) => {
   const previousStep = steps.find(
     (_, index) => steps[index + 1]?.key === currentStep
   )?.key;
@@ -12,6 +19,7 @@ const Footer = ({ currentStep, setCurrentStep, showPreviewOnSmDevice, setShowPre
   const nextStep = steps.find(
     (_, index) => steps[index - 1]?.key === currentStep
   )?.key;
+
 
   return (
     <footer className="w-full border-t px-3 py-5 shrink-0">
@@ -32,16 +40,22 @@ const Footer = ({ currentStep, setCurrentStep, showPreviewOnSmDevice, setShowPre
           </Button>
         </div>
         <Button
-        variant="outline"
-        size="icon"
-        onClick={()=> setShowPreviewOnSmDevice(!showPreviewOnSmDevice)}
-        className="md:hidden"
-        title={showPreviewOnSmDevice ? "Show input Form" : "Show Resume preview"}
+          variant="outline"
+          size="icon"
+          onClick={() => setShowPreviewOnSmDevice(!showPreviewOnSmDevice)}
+          className="md:hidden"
+          title={
+            showPreviewOnSmDevice ? "Show input Form" : "Show Resume preview"
+          }
         >
           {showPreviewOnSmDevice ? <PenLineIcon /> : <FileUserIcon />}
         </Button>
         <div className="flex items-center gap-3">
-          <Button asChild variant="secondary">
+          <Button
+            onClick={() => setCurrentResumeId(null)}
+            asChild
+            variant="secondary"
+          >
             <Link href="/resumes">Close Editor</Link>
           </Button>
         </div>

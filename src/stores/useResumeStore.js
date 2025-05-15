@@ -29,6 +29,7 @@ const defaultResumeData = {
     projects: [
       {
         title: "",
+        techStack : [],
         projectLink: "",
         description: "",
       },
@@ -70,12 +71,15 @@ export const useResumeStore = create(
       addResume: () => {
         const id = uuidv4();
         const timestamp = new Date().toISOString();
+        const resumeData = {
+          ...JSON.parse(JSON.stringify(defaultResumeData)),
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        };
         set((state) => ({
           resumes: {
             ...state.resumes,
-            [id]: JSON.parse(JSON.stringify(defaultResumeData)),
-            createdAt: timestamp,
-            updatedAt: timestamp,
+            [id]: resumeData,
           },
           currentResumeId: id,
         }));

@@ -42,11 +42,11 @@ export default function ExperiencesForm() {
     setHasWorkExperience,
   } = useResumeStore();
 
-  const resumeData = resumes[currentResumeId] ||{};
-
+  const resumeData = resumes[currentResumeId] || {};
 
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState(null);
+   const [inputValue, setInputValue] = useState("");
 
   const defaultWorkExperiences = [
     {
@@ -332,28 +332,99 @@ export default function ExperiencesForm() {
                     </div>
                   </>
                 ) : (
-                  <FormField
-                    control={form.control}
-                    name={`projects.${index}.projectLink`}
-                    render={({ field }) => (
-                      <>
-                        <FormItem>
-                          <FormLabel>Project Link</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="https://yourapp.com"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                        <FormDescription>
-                          This link will be attached to the title of yout
-                          project.
-                        </FormDescription>
-                      </>
-                    )}
-                  />
+                  <>
+                    <FormField
+                      control={form.control}
+                      name={`projects.${index}.techStack`}
+                      render={({ field }) => {
+
+                        const techStackArray = field.value || [];
+
+                        const handleKeyDown = (e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            const newTech = inputValue.trim();
+                            if (newTech && !techStackArray.includes(newTech)) {
+                              field.onChange([...techStackArray, newTech]);
+                              setInputValue("");
+                            }
+                          }
+                        };
+
+                        const removeTech = (techToRemove) => {
+                          const filtered = techStackArray.filter(
+                            (t) => t !== techToRemove
+                          );
+                          field.onChange(filtered);
+                        };
+
+                        return (
+                          <>
+                            <FormItem>
+                              <FormLabel>Tech Stack</FormLabel>
+                              <FormControl>
+                                <Input
+                                  value={inputValue}
+                                  onChange={(e) =>
+                                    setInputValue(e.target.value)
+                                  }
+                                  onKeyDown={handleKeyDown}
+                                  placeholder="Add tech stack and press Enter"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                            <FormDescription>
+                              Add at least 3 - 4 technologies you used to develop
+                              this project
+                            </FormDescription>
+                            {/* Preview added tech stacks */}
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {techStackArray.map((tech) => (
+                                <div
+                                  key={tech}
+                                  className="flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm"
+                                >
+                                  <span>{tech}</span>
+                                  <button
+                                    type="button"
+                                    className="ml-2 text-blue-600 hover:text-blue-900"
+                                    onClick={() => removeTech(tech)}
+                                    aria-label={`Remove ${tech}`}
+                                  >
+                                    &times;
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        );
+                      }}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`projects.${index}.projectLink`}
+                      render={({ field }) => (
+                        <>
+                          <FormItem>
+                            <FormLabel>Project Link</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="https://yourapp.com"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                          <FormDescription>
+                            This link will be attached to the title of yout
+                            project.
+                          </FormDescription>
+                        </>
+                      )}
+                    />
+                  </>
                 )}
                 <FormField
                   control={form.control}

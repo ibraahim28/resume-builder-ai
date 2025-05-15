@@ -31,7 +31,6 @@ const SkillsForm = () => {
     },
   });
 
-  // Reset form when data changes
   useEffect(() => {
     if (resumeData.skills) {
       form.reset({
@@ -42,7 +41,6 @@ const SkillsForm = () => {
 
   const skills = form.watch("skills") || [];
 
-  // Autosave effect with debounce
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);

@@ -6,7 +6,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Footer from "./Footer";
 import ResumePreviewSection from "@/components/ResumePreviewSection";
 import { useResumeStore } from "@/stores/useResumeStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 const ResumeEditor = () => {
   const { currentResumeId, setCurrentResumeId, addResume } = useResumeStore();
@@ -16,11 +17,13 @@ const ResumeEditor = () => {
 
   const currentStep = searchParams.get("step") || steps[0]?.key;
 
+  const [showPreviewOnSmDevice, setShowPreviewOnSmDevice] = useState(false);
+
   useEffect(() => {
     const resumeId = searchParams.get("resumeId");
     if (resumeId) {
       setCurrentResumeId(resumeId);
-    } else if (currentResumeId) {
+    } else if (!resumeId && currentResumeId) {
       params.set("resumeId", currentResumeId);
       router.replace(`?${params.toString()}`);
     } else {
@@ -53,7 +56,12 @@ const ResumeEditor = () => {
       </header>
 
       <main className="flex flex-1 overflow-hidden">
-        <div className="w-full md:w-1/2 flex flex-col">
+        <div
+          className={cn(
+            "w-full md:w-1/2 flex flex-col",
+            showPreviewOnSmDevice ? "hidden md:flex " : "flex md:w-1/2"
+          )}
+        >
           <div className="flex-1 overflow-y-auto p-3 space-y-6">
             <StepBreadcrumbs
               currentStep={currentStep}
@@ -64,10 +72,16 @@ const ResumeEditor = () => {
         </div>
 
         <div className="grow md:border-r" />
-        <ResumePreviewSection />
+        <ResumePreviewSection showPreviewOnSmDevice={showPreviewOnSmDevice} />
       </main>
 
-      <Footer currentStep={currentStep} setCurrentStep={setCurrentStep} />
+      <Footer
+        currentStep={currentStep}
+        setCurrentStep={setCurrentStep}
+        showPreviewOnSmDevice={showPreviewOnSmDevice}
+        setShowPreviewOnSmDevice={setShowPreviewOnSmDevice}
+        setCurrentResumeId={setCurrentResumeId}
+      />
     </div>
   );
 };

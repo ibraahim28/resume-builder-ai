@@ -1,6 +1,8 @@
 import { useResumeStore } from "@/stores/useResumeStore";
 import React from "react";
 import { formatDate } from "date-fns";
+import { BorderStyles } from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
+import { Badge } from "./ui/badge";
 
 const ExperiencesPreviewSection = () => {
   const { resumes, currentResumeId, hasWorkExperience } = useResumeStore();
@@ -8,7 +10,7 @@ const ExperiencesPreviewSection = () => {
 
   const workExperiences = resumeData?.workExperience?.workExperiences || [];
   const projects = resumeData?.project?.projects || [];
-  const { colorHex } = resumeData?.appearance || {};
+  const { colorHex, borderStyle } = resumeData?.appearance || {};
 
   const getNonEmptyExperiences = (list = []) =>
     list.filter((exp) => exp && Object.values(exp).some(Boolean));
@@ -38,7 +40,7 @@ const ExperiencesPreviewSection = () => {
         </p>
         {experiences.map((exp, idx) => (
           <div key={idx} className="break-inside-avoid space-y-1">
-            <div className="flex items-center justify-between text-sm font-semibold">
+            <div className="flex  items-center justify-between text-sm font-semibold">
               {hasWorkExperience ? (
                 <p
                   style={{
@@ -49,15 +51,40 @@ const ExperiencesPreviewSection = () => {
                   {exp.position}{" "}
                 </p>
               ) : (
-                <p className={exp.projectLink ? "text-blue-500" : ""}>
-                  {" "}
-                  {exp.projectLink ? (
-                    <a href={exp.projectLink}>{exp.title}</a>
-                  ) : (
-                    exp.title
-                  )}{" "}
-                </p>
+                <div className="flex flex-col items-start">
+                  <p className={exp.projectLink ? "text-blue-500" : ""}>
+                    {" "}
+                    {exp.projectLink ? (
+                      <a href={exp.projectLink}>{exp.title}</a>
+                    ) : (
+                      exp.title
+                    )}{" "}
+                  </p>
+
+                  {exp.techStack && exp.techStack.length > 0 && (
+                    <div className="flex flex-wrap gap-2 my-3">
+                      {exp.techStack.map((tech, index) => ( console.log(exp.techStack),
+                        <Badge
+                          key={index}
+                          className="text-xs font-semibold text-white px-2 py-1"
+                          style={{
+                            backgroundColor: colorHex,
+                            borderRadius:
+                              borderStyle === BorderStyles.SQUARE
+                                ? "0px"
+                                : borderStyle === BorderStyles.CIRCLE
+                                  ? "999px"
+                                  : "8px",
+                          }}
+                        >
+                          {tech}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
+
               {exp.startDate && (
                 <span>
                   {formatDate(exp.startDate, "MM/yyyy")} -{" "}

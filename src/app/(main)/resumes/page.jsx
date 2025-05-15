@@ -3,6 +3,8 @@ import { Plus } from "lucide-react";
 import React from "react";
 import MyResume from "./_components/MyResume";
 import Link from "next/link";
+import { v4 as uuidv4 } from "uuid";
+import AddNewResumeBtn from "./_components/AddNewResumeBtn";
 
 export const metadata = {
   title: "Your Resumes",
@@ -19,11 +21,7 @@ const Page = () => {
           </p>
         </div>
         <div>
-          <Button asChild size={"lg"}>
-            <Link href='/resumes/editor'>
-              <Plus /> New Resume
-            </Link>
-          </Button>
+         <AddNewResumeBtn />
         </div>
       </div>
       <MyResume />
