@@ -1,22 +1,23 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { AlarmClock } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ResumeLayout from "./ResumeLayout";
 import { useResumeStore } from "@/stores/useResumeStore";
-
-
+import { getSortedResumeIds } from "@/lib/utils";
 
 const MyResume = () => {
   const [selectedMode, setSelectedMode] = useState("draft");
-  const {resumes} = useResumeStore();
+  const { resumes } = useResumeStore();
 
-  const resumesArr = Object.keys(resumes);
+  const [resumesArr, setResumesArr] = useState([]);
 
-  
+  useEffect(() => {
+    setResumesArr(getSortedResumeIds(resumes));
+  }, [resumes, setResumesArr]);
 
   return (
-    <div >
+    <div>
       <div className="mb-2">
         <h2 className="text-blue-950 text-xl font-semibold">My Resume</h2>
       </div>
@@ -46,9 +47,11 @@ const MyResume = () => {
           </Button>
         </div>
       </div>
-      {
-        selectedMode === 'draft' ? (<ResumeLayout resumeIdArr={resumesArr} />) : (<ResumeLayout resumeIdArr={resumesArr} />)
-      }
+      {selectedMode === "draft" ? (
+        <ResumeLayout resumeIdArr={resumesArr} />
+      ) : (
+        <ResumeLayout resumeIdArr={resumesArr} />
+      )}
     </div>
   );
 };

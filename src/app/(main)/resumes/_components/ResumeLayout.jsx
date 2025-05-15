@@ -20,6 +20,8 @@ const ResumeLayout = ({ resumeIdArr }) => {
     router.push(`/resumes/editor`);
   };
 
+  
+
   return (
     <div className="container mx-auto p-4">
       <div

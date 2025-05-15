@@ -34,3 +34,16 @@ export function getLastUpdatedTime(timestamp) {
 
   return updated.toLocaleDateString();
 }
+
+export function getSortedResumeIds(resumes) {
+  const resumesArr = Object.entries(resumes);
+
+  resumesArr.sort((a, b) => {
+    const updatedA = new Date(a[1].updatedAt || 0);
+    const updatedB = new Date(b[1].updatedAt || 0);
+    return updatedB - updatedA;
+  });
+
+  const sortedIds = resumesArr.map(([id]) => id);
+  return sortedIds;
+}
