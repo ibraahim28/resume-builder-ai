@@ -14,10 +14,14 @@ import { useResumeStore } from "@/stores/useResumeStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRef, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { saveResume } from "../../_actions/actions";
+import toast from "react-hot-toast";
 
 export default function PersonalInfoForm() {
   const photoInputRef = useRef(null);
-  const { resumes, currentResumeId, setResumeData } = useResumeStore();
+  const { resumes, currentResumeId, setResumeData, setIsSaving } =
+    useResumeStore();
+  const resumeStore = useResumeStore;
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState("null");
 
@@ -69,9 +73,10 @@ export default function PersonalInfoForm() {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
       timeoutRef.current = setTimeout(async () => {
-        setSaveStatus("saving");
-
         try {
+          setIsSaving(true);
+          setSaveStatus("saving");
+
           const isValid = await form.trigger(name);
 
           if (!isValid) return;
@@ -79,7 +84,6 @@ export default function PersonalInfoForm() {
           const rawValues = form.getValues();
           const currentValues = resumeData.personalInfo;
 
-          // Handle photo conversion if it's a File object
           let photoValue = rawValues.photo;
           if (photoValue instanceof File) {
             try {
@@ -90,7 +94,6 @@ export default function PersonalInfoForm() {
             }
           }
 
-          // Only update if values have actually changed
           const hasChanges = Object.keys(rawValues).some(
             (key) => rawValues[key] !== currentValues?.[key]
           );
@@ -104,11 +107,30 @@ export default function PersonalInfoForm() {
                 photo: photoValue,
               },
             }));
+
+            const updatedResumes = resumeStore.getState().resumes;
+            console.log(
+              "updatedStoreResume-----------------",
+              updatedResumes[currentResumeId]
+            );
+
+            const result = await saveResume(
+              currentResumeId,
+              updatedResumes[currentResumeId]
+            );
+
+            if (!result.success) toast.error("Error saving Resume");
+
+            console.log("result---------------------", result);
+
+            setIsSaving(false);
             setSaveStatus("saved");
           } else {
+            setIsSaving(false);
             setSaveStatus(null);
           }
         } catch (error) {
+          setIsSaving(false);
           setSaveStatus("error");
           console.error("Error saving personal info:", error);
         }

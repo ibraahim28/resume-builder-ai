@@ -10,20 +10,21 @@ export const generalInfoSchema = z.object({
 export const personalInfoSchema = z.object({
   photo: z
     .custom()
-    .refine(
-      (file) => file === null || file instanceof File || typeof file === 'string',
-      "Photo must be a valid file or base64 string"
-    )
+    .nullable()
     .refine(
       (file) =>
         file === null ||
         (file instanceof File
-          ? ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)
-          : file.startsWith('data:image/')),
+          ? ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(
+              file.type
+            )
+          : typeof file === "string" && file.startsWith("data:image/")),
       "Photo must be a JPEG, PNG, GIF, or WEBP image"
     )
     .refine(
-      (file) => file === null || (file instanceof File ? file.size <= 4 * 1024 * 1024 : true),
+      (file) =>
+        file === null ||
+        (file instanceof File ? file.size <= 4 * 1024 * 1024 : true),
       "Photo must be less than 4MB"
     )
     .optional(),
@@ -46,7 +47,7 @@ export const educationSchema = z.object({
         endDate: optionalString,
       })
     )
-    .optional(),
+    .default([]),
 });
 
 export const workExperienceSchema = z.object({
@@ -60,7 +61,7 @@ export const workExperienceSchema = z.object({
         description: optionalString,
       })
     )
-    .optional(),
+    .default([]),
 });
 
 export const projectsSchema = z.object({
@@ -68,15 +69,16 @@ export const projectsSchema = z.object({
     .array(
       z.object({
         title: optionalString,
+        techStack: z.array(z.string().trim()).optional(),
         projectLink: optionalString,
         description: optionalString,
       })
     )
-    .optional(),
+    .default([]),
 });
 
 export const skillsSchema = z.object({
-  skills: z.array(z.string().trim()).optional(),
+  skills: z.array(z.string().trim()).default([]),
 });
 
 export const summarySchema = z.object({
@@ -87,7 +89,6 @@ export const appearanceSchema = z.object({
   colorHex: optionalString,
   borderStyle: optionalString,
 });
-
 
 export const resumeSchema = z.object({
   generalInfo: generalInfoSchema,

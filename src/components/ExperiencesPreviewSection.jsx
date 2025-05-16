@@ -63,7 +63,7 @@ const ExperiencesPreviewSection = () => {
 
                   {exp.techStack && exp.techStack.length > 0 && (
                     <div className="flex flex-wrap gap-2 my-3">
-                      {exp.techStack.map((tech, index) => ( console.log(exp.techStack),
+                      {exp.techStack.map((tech, index) => (
                         <Badge
                           key={index}
                           className="text-xs font-semibold text-white px-2 py-1"

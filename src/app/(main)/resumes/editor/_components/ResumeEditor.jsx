@@ -8,9 +8,10 @@ import ResumePreviewSection from "@/components/ResumePreviewSection";
 import { useResumeStore } from "@/stores/useResumeStore";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import useUnloadWarning from "@/hooks/useUnloadWarning";
 
 const ResumeEditor = () => {
-  const { currentResumeId, setCurrentResumeId, addResume } = useResumeStore();
+  const { currentResumeId, setCurrentResumeId, addResume,isSaving } = useResumeStore();
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams.toString());
   const router = useRouter();
@@ -32,6 +33,8 @@ const ResumeEditor = () => {
       router.replace(`?${params.toString()}`);
     }
   }, [searchParams, currentResumeId]);
+
+  useUnloadWarning(isSaving)
 
   const setCurrentStep = (key) => {
     params.set("step", key);
