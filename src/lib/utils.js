@@ -35,15 +35,12 @@ export function getLastUpdatedTime(timestamp) {
   return updated.toLocaleDateString();
 }
 
-export function getSortedResumeIds(resumes) {
-  const resumesArr = Object.entries(resumes);
+export function getSortedResumes(resumesArray) {
+  if (!Array.isArray(resumesArray)) return [];
 
-  resumesArr.sort((a, b) => {
-    const updatedA = new Date(a[1].updatedAt || 0);
-    const updatedB = new Date(b[1].updatedAt || 0);
-    return updatedB - updatedA;
+  return [...resumesArray].sort((a, b) => {
+    const updatedA = new Date(a.updatedAt || 0);
+    const updatedB = new Date(b.updatedAt || 0);
+    return updatedB - updatedA; // Latest first
   });
-
-  const sortedIds = resumesArr.map(([id]) => id);
-  return sortedIds;
 }

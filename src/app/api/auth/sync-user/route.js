@@ -12,9 +12,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Using req.body directly (no need for req.json())
-    const { email, firstName, lastName, profileImage } = await req.json(); // Ensure to wait for the body to be parsed
-
+    const { email, firstName, lastName, profileImage } = await req.json(); 
 
     await connectToDB();
 
