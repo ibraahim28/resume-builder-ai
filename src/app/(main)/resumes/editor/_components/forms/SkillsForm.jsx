@@ -15,12 +15,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { useResumeStore } from "@/stores/useResumeStore";
+import { saveResume } from "../../_actions/actions";
+import toast from "react-hot-toast";
 
 const SkillsForm = () => {
   const [newSkill, setNewSkill] = useState("");
   const [saveStatus, setSaveStatus] = useState("null");
   const timeoutRef = useRef();
-  const { resumes, currentResumeId, setResumeData } = useResumeStore();
+  const { resumes, currentResumeId, setResumeData, setIsSaving } =
+    useResumeStore();
+  const resumeStore = useResumeStore;
 
   const resumeData = resumes[currentResumeId] || {};
 
@@ -39,34 +43,64 @@ const SkillsForm = () => {
     }
   }, [resumeData.skills, form]);
 
-  const skills = form.watch("skills") || [];
+  const skills = form.getValues("skills");
 
   useEffect(() => {
-    const subscription = form.watch((value, { name, type }) => {
+    const subscription = form.watch((value, { name }) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
       timeoutRef.current = setTimeout(async () => {
+        setIsSaving(true);
         setSaveStatus("saving");
+
         try {
-          const isValid = await form.trigger();
+          const isValid = await form.trigger("skills");
 
           if (!isValid) {
+            setIsSaving(false);
             setSaveStatus("error");
             return;
           }
 
           const rawValues = form.getValues();
-          setResumeData((prev) => ({
-            ...prev,
-            skills: {
-              ...prev.skills,
-              ...rawValues,
-            },
-          }));
+          const currentValues = resumeData.skills;
 
-          setSaveStatus("saved");
+          const hasChanges =
+            JSON.stringify(rawValues.skills) !==
+            JSON.stringify(currentValues?.skills);
+
+          if (hasChanges) {
+            setResumeData((prev) => ({
+              ...prev,
+              skills: {
+                ...prev.skills,
+                skills: rawValues.skills,
+              },
+            }));
+
+            const updatedResumes = resumeStore.getState().resumes;
+
+            const result = await saveResume(
+              currentResumeId,
+              updatedResumes[currentResumeId]
+            );
+
+            if (!result.success) {
+              toast.error("Error saving Resume");
+              setIsSaving(false);
+              setSaveStatus("error");
+              return;
+            }
+
+            setIsSaving(false);
+            setSaveStatus("saved");
+          } else {
+            setIsSaving(false);
+            setSaveStatus(null);
+          }
         } catch (error) {
-          console.error("Error saving general info:", error);
+          console.error("Error saving skills:", error);
+          setIsSaving(false);
           setSaveStatus("error");
         }
       }, 1000);
@@ -76,7 +110,7 @@ const SkillsForm = () => {
       subscription.unsubscribe();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [form, setResumeData]);
+  }, [form, resumeData.skills, setResumeData]);
 
   const addSkill = () => {
     if (newSkill.trim() && !skills.includes(newSkill.trim())) {
@@ -105,6 +139,17 @@ const SkillsForm = () => {
         <p className="text-sm text-muted-foreground">
           Add your technical and professional skills
         </p>
+        {saveStatus === "saving" && (
+          <p className="text-xs text-amber-500">Saving...</p>
+        )}
+        {saveStatus === "saved" && (
+          <p className="text-xs text-green-500">All changes saved</p>
+        )}
+        {saveStatus === "error" && (
+          <p className="text-xs text-red-500">
+            Validation error - please check form fields
+          </p>
+        )}
       </div>
 
       <Form {...form}>

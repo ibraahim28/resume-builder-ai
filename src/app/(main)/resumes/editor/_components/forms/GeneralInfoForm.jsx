@@ -14,12 +14,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useResumeStore } from "@/stores/useResumeStore";
+import { saveResume } from "../../_actions/actions";
+import toast from "react-hot-toast";
 
 const GeneralInfoForm = () => {
-  const { currentResumeId, resumes, setResumeData } = useResumeStore();
+  const { currentResumeId, resumes, setResumeData, setIsSaving } =
+    useResumeStore();
+  const resumeStore = useResumeStore;
   const timeoutRef = useRef();
 
-const resumeData = resumes[currentResumeId] || {};
+  const resumeData = resumes[currentResumeId] || {};
 
   const form = useForm({
     resolver: zodResolver(generalInfoSchema),
@@ -32,7 +36,6 @@ const resumeData = resumes[currentResumeId] || {};
 
   const [saveStatus, setSaveStatus] = useState(null);
 
-  // Reset form when data changes
   useEffect(() => {
     if (resumeData.generalInfo) {
       const newValues = {
@@ -44,17 +47,18 @@ const resumeData = resumes[currentResumeId] || {};
     }
   }, [resumeData.generalInfo, form]);
 
-  // Handle form changes and auto-save
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
       timeoutRef.current = setTimeout(async () => {
+        setIsSaving(true);
         setSaveStatus("saving");
         try {
           const isValid = await form.trigger();
 
           if (!isValid) {
+            setIsSaving(false);
             setSaveStatus("error");
             return;
           }
@@ -62,7 +66,6 @@ const resumeData = resumes[currentResumeId] || {};
           const rawValues = form.getValues();
           const currentValues = resumeData.generalInfo;
 
-          // Only update if values have actually changed
           const hasChanges = Object.keys(rawValues).some(
             (key) => rawValues[key] !== currentValues?.[key]
           );
@@ -75,12 +78,32 @@ const resumeData = resumes[currentResumeId] || {};
                 ...rawValues,
               },
             }));
+            const updatedResumes = resumeStore.getState().resumes;
+            console.log(
+              "updatedStoreResume-----------------",
+              updatedResumes[currentResumeId]
+            );
+
+            const result = await saveResume(
+              currentResumeId,
+              updatedResumes[currentResumeId]
+            );
+
+            if (!result.success) {
+              toast.error("Error saving Resume");
+              setIsSaving(false);
+              setSaveStatus("error");
+            }
+
+            setIsSaving(false);
             setSaveStatus("saved");
           } else {
+            setIsSaving(false);
             setSaveStatus(null);
           }
         } catch (error) {
           console.error("Error saving general info:", error);
+          setIsSaving(false);
           setSaveStatus("error");
         }
       }, 500);
@@ -99,6 +122,17 @@ const resumeData = resumes[currentResumeId] || {};
         <p className="text-sm text-muted-foreground">
           This will not appear on your resume.
         </p>
+        {saveStatus === "saving" && (
+          <p className="text-xs text-amber-500">Saving...</p>
+        )}
+        {saveStatus === "saved" && (
+          <p className="text-xs text-green-500">All changes saved</p>
+        )}
+        {saveStatus === "error" && (
+          <p className="text-xs text-red-500">
+            Validation error - please check form fields
+          </p>
+        )}
       </div>
 
       <Form {...form}>

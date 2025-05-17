@@ -17,13 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  PlusCircle,
-  Trash2,
-  ChevronUp,
-  ChevronDown,
-  GripHorizontal,
-} from "lucide-react";
+import { PlusCircle, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -32,6 +26,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import toast from "react-hot-toast";
+import { saveResume } from "../../_actions/actions";
 
 export default function ExperiencesForm() {
   const {
@@ -40,13 +35,15 @@ export default function ExperiencesForm() {
     setResumeData,
     hasWorkExperience,
     setHasWorkExperience,
+    setIsSaving,
   } = useResumeStore();
+  const resumeStore = useResumeStore;
 
   const resumeData = resumes[currentResumeId] || {};
 
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState(null);
-   const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState("");
 
   const defaultWorkExperiences = [
     {
@@ -107,11 +104,13 @@ export default function ExperiencesForm() {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
       timeoutRef.current = setTimeout(async () => {
+        setIsSaving(true);
         setSaveStatus("saving");
         try {
           const isValid = await form.trigger();
 
           if (!isValid) {
+            setIsSaving(false);
             setSaveStatus("error");
             return;
           }
@@ -147,12 +146,34 @@ export default function ExperiencesForm() {
                 };
               }
             });
+
+            const updatedResumes = resumeStore.getState().resumes;
+            console.log(
+              "updatedStoreResume-----------------",
+              updatedResumes[currentResumeId]
+            );
+
+            const result = await saveResume(
+              currentResumeId,
+              updatedResumes[currentResumeId]
+            );
+
+            if (!result.success) {
+              toast.error("Error saving Resume");
+              setIsSaving(false);
+              setSaveStatus("error");
+            }
+
+            console.log("result---------------------", result);
+            setIsSaving(false);
             setSaveStatus("saved");
           } else {
+            setIsSaving(false);
             setSaveStatus(null);
           }
         } catch (error) {
           console.error("Error saving experiences:", error);
+          setIsSaving(false);
           setSaveStatus("error");
         }
       }, 1000);
@@ -245,11 +266,10 @@ export default function ExperiencesForm() {
           {fields.map((item, index) => (
             <Card key={item.id}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-medium flex items-center justify-between">
+                <CardTitle className="text-lg font-medium ">
                   {hasWorkExperience
                     ? `Experience ${index + 1}`
                     : `Project ${index + 1}`}
-                  <GripHorizontal className="text-muted-foreground cursor-grab" />
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -337,7 +357,6 @@ export default function ExperiencesForm() {
                       control={form.control}
                       name={`projects.${index}.techStack`}
                       render={({ field }) => {
-
                         const techStackArray = field.value || [];
 
                         const handleKeyDown = (e) => {
@@ -375,8 +394,8 @@ export default function ExperiencesForm() {
                               <FormMessage />
                             </FormItem>
                             <FormDescription>
-                              Add at least 3 - 4 technologies you used to develop
-                              this project
+                              Add at least 3 - 4 technologies you used to
+                              develop this project
                             </FormDescription>
                             {/* Preview added tech stacks */}
                             <div className="flex flex-wrap gap-2 mt-2">

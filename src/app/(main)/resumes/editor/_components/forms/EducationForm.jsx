@@ -22,11 +22,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useResumeStore } from "@/stores/useResumeStore";
+import { saveResume } from "../../_actions/actions";
+import toast from "react-hot-toast";
 
 const EducationForm = () => {
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState(null);
-  const { resumes, currentResumeId, setResumeData } = useResumeStore();
+  const { resumes, currentResumeId, setResumeData, setIsSaving } =
+    useResumeStore();
+  const resumeStore = useResumeStore;
   const resumeData = resumes[currentResumeId] || {};
 
   const form = useForm({
@@ -71,11 +75,13 @@ const EducationForm = () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
       timeoutRef.current = setTimeout(async () => {
+        setIsSaving(true);
         setSaveStatus("saving");
         try {
           const isValid = await form.trigger();
 
           if (!isValid) {
+            setIsSaving(false);
             setSaveStatus("error");
             return;
           }
@@ -83,7 +89,6 @@ const EducationForm = () => {
           const rawValues = form.getValues();
           const currentValues = resumeData.education;
 
-          // Only update if values have actually changed
           const hasChanges =
             JSON.stringify(rawValues.educations) !==
             JSON.stringify(currentValues?.educations);
@@ -96,12 +101,33 @@ const EducationForm = () => {
                 educations: rawValues.educations,
               },
             }));
+
+            const updatedResumes = resumeStore.getState().resumes;
+            console.log(
+              "updatedStoreResume-----------------",
+              updatedResumes[currentResumeId]
+            );
+
+            const result = await saveResume(
+              currentResumeId,
+              updatedResumes[currentResumeId]
+            );
+
+            if (!result.success) {
+              toast.error("Error saving Resume");
+              setIsSaving(false);
+              setSaveStatus("error");
+            }
+
+            setIsSaving(false);
             setSaveStatus("saved");
           } else {
+            setIsSaving(false);
             setSaveStatus(null);
           }
         } catch (error) {
           console.error("Error saving education:", error);
+          setIsSaving(false);
           setSaveStatus("error");
         }
       }, 1000);

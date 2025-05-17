@@ -73,13 +73,16 @@ export default function PersonalInfoForm() {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
       timeoutRef.current = setTimeout(async () => {
+        setIsSaving(true);
+        setSaveStatus("saving");
         try {
-          setIsSaving(true);
-          setSaveStatus("saving");
-
           const isValid = await form.trigger(name);
 
-          if (!isValid) return;
+          if (!isValid) {
+            setIsSaving(false);
+            setSaveStatus("error");
+            return;
+          }
 
           const rawValues = form.getValues();
           const currentValues = resumeData.personalInfo;
@@ -119,9 +122,11 @@ export default function PersonalInfoForm() {
               updatedResumes[currentResumeId]
             );
 
-            if (!result.success) toast.error("Error saving Resume");
-
-            console.log("result---------------------", result);
+            if (!result.success) {
+              toast.error("Error saving Resume");
+              setIsSaving(false);
+              setSaveStatus("error");
+            }
 
             setIsSaving(false);
             setSaveStatus("saved");

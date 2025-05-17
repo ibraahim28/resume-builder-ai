@@ -14,9 +14,13 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useResumeStore } from "@/stores/useResumeStore";
+import { saveResume } from "../../_actions/actions";
+import toast from "react-hot-toast";
 
 const SummaryForm = () => {
-  const { resumes, currentResumeId, setResumeData } = useResumeStore();
+  const { resumes, currentResumeId, setResumeData, setIsSaving } =
+    useResumeStore();
+  const resumeStore = useResumeStore;
 
   const resumeData = resumes[currentResumeId] || {};
 
@@ -46,11 +50,13 @@ const SummaryForm = () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
       timeoutRef.current = setTimeout(async () => {
+        setIsSaving(true);
         setSaveStatus("saving");
         try {
           const isValid = await form.trigger();
 
           if (!isValid) {
+            setIsSaving(false);
             setSaveStatus("error");
             return;
           }
@@ -58,7 +64,6 @@ const SummaryForm = () => {
           const rawValues = form.getValues();
           const currentValues = resumeData.summary;
 
-          // Only update if values have actually changed
           const hasChanges = Object.keys(rawValues).some(
             (key) => rawValues[key] !== currentValues?.[key]
           );
@@ -71,12 +76,35 @@ const SummaryForm = () => {
                 ...rawValues,
               },
             }));
+
+            const updatedResumes = resumeStore.getState().resumes;
+            console.log(
+              "updatedStoreResume-----------------",
+              updatedResumes[currentResumeId]
+            );
+
+            const result = await saveResume(
+              currentResumeId,
+              updatedResumes[currentResumeId]
+            );
+
+            if (!result.success) {
+              toast.error("Error saving Resume");
+              setIsSaving(false);
+              setSaveStatus("error");
+            }
+
+            console.log("result---------------------", result);
+
+            setIsSaving(false);
             setSaveStatus("saved");
           } else {
+            setIsSaving(false);
             setSaveStatus(null);
           }
         } catch (error) {
           console.error("Error saving summary:", error);
+          setIsSaving(false);
           setSaveStatus("error");
         }
       }, 1000);
