@@ -33,13 +33,14 @@ export default function ExperiencesForm() {
     resumes,
     currentResumeId,
     setResumeData,
-    hasWorkExperience,
+    getHasWorkExperience,
     setHasWorkExperience,
     setIsSaving,
   } = useResumeStore();
   const resumeStore = useResumeStore;
 
   const resumeData = resumes[currentResumeId] || {};
+  const hasWorkExperience = getHasWorkExperience();
 
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState(null);
@@ -64,10 +65,14 @@ export default function ExperiencesForm() {
   ];
 
   const isFormEmpty = (entries) =>
-    Array.isArray(entries) &&
-    entries.every((entry) =>
-      Object.values(entry).every((val) => !val || val.trim?.() === "")
-    );
+    !entries?.length || entries.every((entry) => {
+      // For work experiences, check if any of the main fields have values
+      if (hasWorkExperience) {
+        return !entry.position && !entry.company && !entry.description;
+      }
+      // For projects, check if any of the main fields have values
+      return !entry.title && !entry.description && (!entry.techStack?.length);
+    });
 
   const form = useForm({
     resolver: zodResolver(
@@ -199,8 +204,7 @@ export default function ExperiencesForm() {
 
     setHasWorkExperience(true);
     form.reset({
-      workExperiences:
-        resumeData.workExperience?.workExperiences || defaultWorkExperiences,
+      workExperiences: defaultWorkExperiences,
     });
   };
 
@@ -213,7 +217,7 @@ export default function ExperiencesForm() {
 
     setHasWorkExperience(false);
     form.reset({
-      projects: resumeData.project?.projects || defaultProjects,
+      projects: defaultProjects,
     });
   };
 

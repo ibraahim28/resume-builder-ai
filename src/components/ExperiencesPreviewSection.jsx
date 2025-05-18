@@ -5,8 +5,9 @@ import { BorderStyles } from "@/app/(main)/resumes/editor/_components/BorderStyl
 import { Badge } from "./ui/badge";
 
 const ExperiencesPreviewSection = () => {
-  const { resumes, currentResumeId, hasWorkExperience } = useResumeStore();
+  const { resumes, currentResumeId, getHasWorkExperience } = useResumeStore();
   const resumeData = resumes[currentResumeId] || {};
+  const hasWorkExperience = getHasWorkExperience();
 
   const workExperiences = resumeData?.workExperience?.workExperiences || [];
   const projects = resumeData?.project?.projects || [];

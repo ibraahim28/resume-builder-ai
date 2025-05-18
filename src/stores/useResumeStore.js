@@ -55,6 +55,7 @@ const defaultResumeData = {
     colorHex: "",
     borderStyle: "",
   },
+  hasWorkExperience: true,
 
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -65,7 +66,6 @@ export const useResumeStore = create(
     (set, get) => ({
       resumes: {},
       currentResumeId: null,
-      hasWorkExperience: true,
       isSaving: false,
 
       addResume: () => {
@@ -101,77 +101,27 @@ export const useResumeStore = create(
 
       setIsSaving: (flag) => set({ isSaving: flag }),
 
-      setHasWorkExperience: (flag) => set({ hasWorkExperience: flag }),
+      setHasWorkExperience: (flag) => {
+        const { currentResumeId } = get();
+        if (!currentResumeId) return;
+        
+        set((state) => ({
+          resumes: {
+            ...state.resumes,
+            [currentResumeId]: {
+              ...state.resumes[currentResumeId],
+              hasWorkExperience: flag,
+              updatedAt: new Date().toISOString(),
+            },
+          },
+        }));
+      },
 
-      // saveResumeData: async (sectionToUpdate, form) => {
-      //   const { currentResumeId, resumes } = get();
-      //   if (!currentResumeId) return false;
-
-      //   set({ isSaving: true });
-      //   try {
-      //     const isValid = await form.trigger();
-      //     if (!isValid) {
-      //       set({ isSaving: false });
-      //       return false;
-      //     }
-
-      //     const values = form.getValues();
-      //     let updatedSection;
-
-      //     switch (sectionToUpdate) {
-      //       case "general-info":
-      //         updatedSection = { generalInfo: values.generalInfo };
-      //         break;
-      //       case "personal-info":
-      //         updatedSection = { personalInfo: values.personalInfo };
-      //         break;
-      //       case "workExperience":
-      //         updatedSection = {
-      //           workExperience: { workExperiences: values.workExperiences },
-      //         };
-      //         break;
-      //       case "project":
-      //         updatedSection = { project: { projects: values.projects } };
-      //         break;
-      //       case "education":
-      //         updatedSection = { education: { educations: values.educations } };
-      //         break;
-      //       case "skills":
-      //         updatedSection = { skills: { skills: values.skills } };
-      //         break;
-      //       case "summary":
-      //         updatedSection = { summary: { summary: values.summary } };
-      //         break;
-      //       case "appearance":
-      //         updatedSection = { appearance: values.appearance };
-      //         break;
-      //       default:
-      //         set({ isSaving: false });
-      //         return false;
-      //     }
-
-      //     // Update the correct resume by ID
-      //     set((state) => ({
-      //       resumes: {
-      //         ...state.resumes,
-      //         [currentResumeId]: {
-      //           ...state.resumes[currentResumeId],
-      //           ...updatedSection,
-      //         },
-      //       },
-      //     }));
-
-      //     console.log(
-      //       `Saved section ${sectionToUpdate} to resume ${currentResumeId}`
-      //     );
-      //     return true;
-      //   } catch (error) {
-      //     console.error("Error saving resume data:", error);
-      //     return false;
-      //   } finally {
-      //     set({ isSaving: false });
-      //   }
-      // },
+      getHasWorkExperience: () => {
+        const { currentResumeId, resumes } = get();
+        if (!currentResumeId) return true;
+        return resumes[currentResumeId]?.hasWorkExperience ?? true;
+      },
 
       setResumeData: (updateFn) => {
         const { currentResumeId, resumes } = get();

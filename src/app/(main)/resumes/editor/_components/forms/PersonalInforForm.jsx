@@ -214,13 +214,6 @@ export default function PersonalInfoForm() {
                     Remove
                   </Button>
                 </div>
-                {value && !(value instanceof File) && (
-                  <div className="mt-2">
-                    <p className="text-sm text-muted-foreground">
-                      Photo is saved
-                    </p>
-                  </div>
-                )}
                 <FormMessage />
               </FormItem>
             )}
