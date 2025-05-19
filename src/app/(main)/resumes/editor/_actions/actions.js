@@ -3,8 +3,7 @@
 import { resumeSchema } from "@/lib/formValidations";
 import Resume from "@/models/Resume";
 import { currentUser } from "@clerk/nextjs/server";
-import { put } from "@vercel/blob";
-import path from "path";
+import { uploadToCloudinary, deleteFromCloudinary } from "@/lib/cloudinary";
 
 export async function saveResume(currentResumeId, values) {
   try {
@@ -21,29 +20,30 @@ export async function saveResume(currentResumeId, values) {
       : null;
 
     let photoUrl = parsed.personalInfo.photo;
+    let cloudinaryResult = null;
 
-    if (photoUrl instanceof File) {
-      if (existingResume?.personelInfo?.photo) {
-        if (existingResume?.personalInfo?.photo !== photoUrl) {
-          await del(existingResume.personalInfo.photo);
-        }
+    // Handle photo upload/removal
+    if (photoUrl && photoUrl.startsWith("data:")) {
+      if (existingResume?.personalInfo?.photo) {
+        await deleteFromCloudinary(existingResume.personalInfo.photo);
       }
 
-      const blob = await put(
-        `resume_photos/${path.extname(photoUrl.name)}`,
-        photoUrl,
-        {
-          access: "public",
-        }
-      );
-      photoUrl = blob.url;
+      // Upload new photo
+      cloudinaryResult = await uploadToCloudinary(photoUrl, {
+        public_id: `resume_${userId}_${currentResumeId}_${Date.now()}`,
+        transformation: [{ width: 500, height: 500, crop: "limit" }],
+      });
+
+      photoUrl = cloudinaryResult.secure_url;
     } else if (photoUrl === null) {
+      // If photo was removed
       if (existingResume?.personalInfo?.photo) {
-        await del(existingResume?.personalInfo?.photo);
+        await deleteFromCloudinary(existingResume.personalInfo.photo);
       }
     }
 
     parsed.personalInfo.photo = photoUrl;
+
     const now = new Date().toISOString();
     const normalizedResume = {
       ...parsed,
@@ -71,6 +71,7 @@ export async function saveResume(currentResumeId, values) {
 
     let resumeDoc;
 
+    // update the resume if it exists, otherwise create a new one
     if (existingResume) {
       resumeDoc = await Resume.findByIdAndUpdate(
         existingResume._id,

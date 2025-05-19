@@ -27,7 +27,6 @@ const ResumeLayout = ({ resumes }) => {
     setOpenMenuId(openMenuId === id ? null : id);
   };
 
-  console.log(resumes)
 
   return (
     <div className="container mx-auto p-4">

@@ -148,18 +148,43 @@ export default function PersonalInfoForm() {
     };
   }, [form, resumeData.personalInfo, setResumeData]);
 
-  const handleRemovePhoto = () => {
-    if (photoInputRef.current) {
-      photoInputRef.current.value = "";
+  const handleRemovePhoto = async () => {
+    setIsSaving(true);
+    setSaveStatus("saving");
+    try {
+      if (photoInputRef.current) {
+        photoInputRef.current.value = "";
+      }
+      form.setValue("photo", null);
+      setResumeData((prev) => ({
+        ...prev,
+        personalInfo: {
+          ...prev.personalInfo,
+          photo: null,
+        },
+      }));
+
+      const updatedResumes = resumeStore.getState().resumes;
+
+      const result = await saveResume(
+        currentResumeId,
+        updatedResumes[currentResumeId]
+      );
+
+      if (!result.success) {
+        toast.error("Error saving Resume");
+        setIsSaving(false);
+        setSaveStatus("error");
+        return;
+      }
+
+      setSaveStatus("saved");
+    } catch (e) {
+      console.error(e);
+      setSaveStatus("error");
+    } finally {
+      setIsSaving(false);
     }
-    form.setValue("photo", null);
-    setResumeData((prev) => ({
-      ...prev,
-      personalInfo: {
-        ...prev.personalInfo,
-        photo: null,
-      },
-    }));
   };
 
   return (

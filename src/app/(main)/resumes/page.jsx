@@ -1,9 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import React from "react";
 import MyResume from "./_components/MyResume";
-import Link from "next/link";
-import { v4 as uuidv4 } from "uuid";
 import AddNewResumeBtn from "./_components/AddNewResumeBtn";
 
 export const metadata = {

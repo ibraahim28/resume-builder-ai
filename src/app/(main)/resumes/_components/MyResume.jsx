@@ -15,7 +15,6 @@ const MyResume = () => {
     const fetchResumes = async () => {
       try {
         const res = await axiosInstance.get("/resumes/fetch-all");
-        console.log("res------------", res);
         setResumes(res.data.resumes);
       } catch (error) {
         console.error("Error fetching resumes:", error);

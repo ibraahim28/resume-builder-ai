@@ -41,6 +41,6 @@ export function getSortedResumes(resumesArray) {
   return [...resumesArray].sort((a, b) => {
     const updatedA = new Date(a.updatedAt || 0);
     const updatedB = new Date(b.updatedAt || 0);
-    return updatedB - updatedA; // Latest first
+    return updatedB - updatedA; 
   });
 }
