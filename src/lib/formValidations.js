@@ -99,4 +99,20 @@ export const resumeSchema = z.object({
   skills: skillsSchema,
   summary: summarySchema,
   appearance: appearanceSchema,
+  hasWorkExperience: z.boolean().optional(),
+});
+
+export const generateSummarySchema = z.object({
+  personalInfo: z.object({
+    firstName: optionalString,
+    lastName: optionalString,
+    jobTitle: optionalString,
+    city: optionalString,
+    country: optionalString,
+  }),
+  workExperiences: workExperienceSchema.shape.workExperiences,
+  projects: projectsSchema.shape.projects,
+  educations: educationSchema.shape.educations,
+  skills: skillsSchema.shape.skills,
+  hasWorkExperience: resumeSchema.shape.hasWorkExperience,
 });

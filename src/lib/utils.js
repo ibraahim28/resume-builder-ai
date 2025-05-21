@@ -10,7 +10,7 @@ export function getLastUpdatedTime(timestamp) {
   const updated = new Date(timestamp);
 
   const diffInSeconds = Math.floor((now - updated) / 1000);
-
+  
   if (diffInSeconds < 60) return "just now";
   if (diffInSeconds < 3600) {
     const mins = Math.floor(diffInSeconds / 60);

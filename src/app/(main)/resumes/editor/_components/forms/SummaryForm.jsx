@@ -16,6 +16,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useResumeStore } from "@/stores/useResumeStore";
 import { saveResume } from "../../_actions/actions";
 import toast from "react-hot-toast";
+import { generateSummary } from "./actions";
+import { Button } from "@/components/ui/button";
+import GenerateSummaryBtn from "./generate-with-ai-btns/generateSummaryBtn";
 
 const SummaryForm = () => {
   const { resumes, currentResumeId, setResumeData, setIsSaving } =
@@ -137,18 +140,6 @@ const SummaryForm = () => {
       </div>
       <Form {...form}>
         <form className="space-y-4">
-          {/* {onGenerateSummary && (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full mb-2"
-              onClick={onGenerateSummary}
-            >
-              <Wand2 className="h-4 w-4 mr-2" />
-              Generate Summary
-            </Button>
-          )} */}
-
           <FormField
             control={form.control}
             name="summary"
@@ -167,6 +158,17 @@ const SummaryForm = () => {
                   most relevant qualifications
                 </FormDescription>
                 <FormMessage />
+                <GenerateSummaryBtn
+                  resumes={resumes}
+                  currentResumeId={currentResumeId}
+                  onSummaryGenerated={(summary) =>
+                    form.setValue("summary", summary, {
+                      shouldDirty: true,
+                      shouldTouch: true,
+                      shouldValidate: true,
+                    })
+                  }
+                />
               </FormItem>
             )}
           />
