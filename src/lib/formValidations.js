@@ -147,3 +147,12 @@ export const generateSummarySchema = z.object({
   skills: skillsSchema.shape.skills,
   hasWorkExperience: resumeSchema.shape.hasWorkExperience,
 });
+
+export const resumeScoreSchema = z.object({
+  score: z.number().min(0).max(100),
+  breakdown: z.object({
+    hirability: z.number().min(0).max(10),
+    professionalism: z.number().min(0).max(10),
+  }),
+  tips: z.array(z.string()),
+});

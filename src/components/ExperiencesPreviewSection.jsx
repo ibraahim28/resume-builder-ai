@@ -97,7 +97,7 @@ const ExperiencesPreviewSection = () => {
               <p className="text-xs font-normal text-gray-500">{exp.company}</p>
             )}
             {exp.description && (
-              <p className="text-sm whitespace-pre-line text-muted-foreground">
+              <p className="text-sm/relaxed whitespace-pre-line text-muted-foreground ">
                 {exp.description}
               </p>
             )}

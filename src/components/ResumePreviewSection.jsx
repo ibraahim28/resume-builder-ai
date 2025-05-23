@@ -3,6 +3,7 @@ import ResumePreview from "./ResumePreview";
 import ColorPicker from "@/app/(main)/resumes/editor/_components/ColorPicker";
 import BorderStyleButton from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
 import { cn } from "@/lib/utils";
+import ResumeEnhancerBtn from "@/app/(main)/resumes/editor/_components/ResumeEnhancer";
 const ResumePreviewSection = ({ showPreviewOnSmDevice }) => {
   return (
     <div
@@ -14,6 +15,7 @@ const ResumePreviewSection = ({ showPreviewOnSmDevice }) => {
       <div className="absolute opacity-50 group-hover:opacity-100 transition-opacity duration-200 left-1 top-1 flex flex-col gap-3 flex-none lg:left-3 lg:top-3">
         <ColorPicker />
         <BorderStyleButton />
+        <ResumeEnhancerBtn />
       </div>
       <div className="flex w-full justify-center overflow-y-auto bg-secondary p-3">
         <ResumePreview classname={"max-w-2xl shadow-md"} />

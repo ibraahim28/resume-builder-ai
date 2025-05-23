@@ -3,6 +3,9 @@
 import {
   generateSummarySchema,
   generateWorkExperienceSchema,
+  resumeSchema,
+  resumeScoreSchema,
+  singleProjectSchema,
   singleWorkExperienceSchema,
 } from "@/lib/formValidations";
 import { generate } from "@/lib/gemini";
@@ -25,10 +28,11 @@ export async function generateSummary(input) {
 The summary should:
 - Sound human and personalized, not robotic or buzzword-filled.
 - Avoid corporate jargon and meaningless clichés like "results-driven" or "dynamic team player."
-- Be 4-5 sentences long.
+- Be 3-5 sentences long.
 - Highlight the candidate's genuine skills, experiences, and impact in a clear, confident voice.
 - Naturally include relevant keywords to improve visibility in ATS filters without stuffing.
 - Feel conversational and real, like something the candidate would proudly use on their resume.
+- Mentions Users career goals and/or target roles (assume based on jobTitle if not provided)
 
 Avoid using headings or formatting, return only the summary paragraph.
 `;
@@ -243,7 +247,7 @@ ${description}
       }
 
       console.log("Parsed JSON:", parsed);
-      const validated = singleWorkExperienceSchema.parse(parsed);
+      const validated = singleProjectSchema.parse(parsed);
 
       if (!validated) {
         throw new Error("Parsed JSON does not match the expected Schema.");
@@ -265,5 +269,122 @@ ${description}
     } else {
       throw new Error("Failed to generate Project. Please try again.");
     }
+  }
+}
+
+export async function analyzeResume(input) {
+  try {
+    if (!input || typeof input !== "object") {
+      throw new Error("Invalid input provided");
+    }
+
+    const {
+      personalInfo,
+      workExperience,
+      project,
+      education,
+      skills,
+      summary,
+      hasWorkExperience,
+    } = resumeSchema.parse(input);
+    const systemMessage = `You are a senior HR professional, resume optimization specialist, and ATS (Applicant Tracking System) consultant. Your role is to critically analyze the provided resume **based on the actual content**, structure, and presentation — not with generic or assumed suggestions.
+
+Please return a detailed evaluation in the following strict JSON format:
+
+{
+  "score": number, // 0-100. Based on ATS optimization, hiring potential, and content clarity.
+  "breakdown": {
+    "hirability": number, // 0-10. How appealing the resume is for recruiters.
+    "professionalism": number // 0-10. Grammar, tone, formatting, clarity, structure.
+  },
+  "tips": string[] // Concise, actionable, relevant suggestions ONLY based on detected flaws.
+}
+
+**Important Guidelines for Evaluation:**
+
+1. This resume can only have either workExperience OR projects. Do not suggest adding both.
+2. The education section **does not include a major field** — evaluate as-is, do not request to "add major."
+3. Do NOT suggest generic improvements like:
+   - "Add a skills section" (if one already exists)
+   - "Check for typos" (unless actual typos are found)
+   - "Add more details" without specifying **which section and why**
+   - "Remove tech stack from projects" (it's useful — do not suggest removing it unless misused)
+4. Suggestions must be professional, **resume-specific**, and directly reflect the actual data structure and content quality.
+5. Keep suggestions in **short sentences**, focusing on clarity, readability, and real improvement.
+6. Provide a fair, balanced score based on resume strength, writing quality, section usage, clarity, and job-readiness.
+
+Only output valid JSON. Do not include explanations or extra text.
+
+    `;
+
+    const userMessage = `
+    Analyze the following resume data:
+    
+    Personal Information:
+    - Name: ${personalInfo.firstName || ""} ${personalInfo.lastName || ""}
+    - JobTitle: ${personalInfo.jobTitle || "N/A"}
+    - Location: ${personalInfo.city || ""}, ${personalInfo.country || ""}
+
+    Summary: 
+    ${summary.summary || ""}
+
+   ${
+     hasWorkExperience
+       ? `
+    Work Experience:
+    ${
+      workExperience.workExperiences
+        ?.map(
+          (we) => `
+      - ${we.position} at ${we.company} (${we.startDate} to ${we.endDate})
+      ${we.description}`
+        )
+        .join("\n") || "None"
+    }
+    `
+       : `
+    Projects:
+    ${
+      project.projects
+        ?.map(
+          (proj) => `
+      - ${proj.title}: ${proj.description} techStack: [${proj.techStack?.join(", ")}]`
+        )
+        .join("\n") || "None"
+    }
+    `
+   }
+    
+    Education:
+    ${
+      education.educations
+        ?.map(
+          (edu) => `
+      - ${edu.degree} at ${edu.school} (${edu.startDate} to ${edu.endDate})`
+        )
+        .join("\n") || "None"
+    }
+    
+    Skills:
+    ${skills.skills?.join(", ") || "None listed"}
+    
+    `;
+
+    console.log("Prompt: ", systemMessage, userMessage);
+
+    const completion = await generate(systemMessage, userMessage);
+
+    const cleaned = completion
+      .replace(/```json/g, "")
+      .replace(/\*\*/g, "")
+      .replace(/```/g, "")
+      .trim();
+    const parsed = JSON.parse(cleaned);
+    const validated = resumeScoreSchema.parse(parsed);
+
+    return validated;
+  } catch (error) {
+    console.error("Resume analysis error:", error);
+    throw new Error("Failed to analyze resume. Please try again.");
   }
 }
