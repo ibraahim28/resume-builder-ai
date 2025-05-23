@@ -1,6 +1,6 @@
 import LoadingButton from "@/components/LoadingButton";
 import React, { useState } from "react";
-import { generateSummary } from "../actions";
+import { generateSummary } from "../../../_actions/AiActions";
 import toast from "react-hot-toast";
 
 const GenerateSummaryBtn = ({
@@ -11,29 +11,35 @@ const GenerateSummaryBtn = ({
   const [loading, setLoading] = useState(false);
 
   const generateSummaryWithAi = async () => {
+    const resume = resumes[currentResumeId];
+
+    if (!resume) {
+      toast.error("Couldn't fetch resume. Please try again.");
+      return;
+    }
+
+    if (!resume.personalInfo.jobTitle || resume.personalInfo.jobTitle === "") {
+      toast.error("Please provide Job title to generate a Summary");
+      return;
+    }
+
+
     try {
       setLoading(true);
+
       const generatedSummary = await generateSummary({
-        personalInfo: resumes[currentResumeId].personalInfo,
-        workExperiences:
-          resumes[currentResumeId].workExperience?.workExperiences || [],
-        projects: resumes[currentResumeId].project?.projects || [],
-        educations: resumes[currentResumeId].education?.educations || [],
-        skills: resumes[currentResumeId].skills?.skills || [],
-        hasWorkExperience: resumes[currentResumeId].hasWorkExperience ?? true,
+        personalInfo: resume.personalInfo,
+        workExperiences: resume.workExperience?.workExperiences || [],
+        projects: resume.project?.projects || [],
+        educations: resume.education?.educations || [],
+        skills: resume.skills?.skills || [],
+        hasWorkExperience: resume.hasWorkExperience ?? true,
       });
 
       if (!generatedSummary || typeof generatedSummary !== "string") {
         toast.error("Failed to generate summary. Please try again.");
         return;
       }
-
-      //   form.setValue("summary", generatedSummary, {
-      //     shouldDirty: true,
-      //     shouldTouch: true,
-      //     shouldValidate: true,
-      //   });
-
       onSummaryGenerated(generatedSummary);
 
       toast.success("AI summary generated!");
@@ -47,12 +53,14 @@ const GenerateSummaryBtn = ({
 
   return (
     <LoadingButton
-      variant="outline"
+      variant="default"
+      title="Generate a summary just for your resume"
       type="button"
       onClick={generateSummaryWithAi}
       loading={loading}
-      children={loading ? "Generating" : "Generate"}
-    />
+    >
+      {loading ? "Generating" : "Generate"}
+    </LoadingButton>
   );
 };
 

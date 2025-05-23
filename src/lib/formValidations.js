@@ -102,6 +102,37 @@ export const resumeSchema = z.object({
   hasWorkExperience: z.boolean().optional(),
 });
 
+export const singleWorkExperienceSchema = z.object({
+  position: optionalString,
+  company: optionalString,
+  startDate: optionalString,
+  endDate: optionalString,
+  description: optionalString,
+});
+
+export const singleProjectSchema = z.object({
+  title: optionalString,
+  techStack: z.array(z.string().trim()).optional(),
+  projectLink: optionalString,
+  description: optionalString,
+});
+
+export const generateWorkExperienceSchema = z.object({
+  description: z
+    .string()
+    .trim()
+    .min(1, "Description is required to generate entry")
+    .min(20, "Description should be at least 20 characters long"),
+});
+
+export const generateProjectEntrySchema = z.object({
+  description: z
+    .string()
+    .trim()
+    .min(1, "Description is required to generate entry")
+    .min(20, "Description should be at least 20 characters long"),
+});
+
 export const generateSummarySchema = z.object({
   personalInfo: z.object({
     firstName: optionalString,

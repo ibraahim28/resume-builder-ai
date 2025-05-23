@@ -14,7 +14,7 @@ import { useResumeStore } from "@/stores/useResumeStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRef, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { saveResume } from "../../_actions/actions";
+import { saveResume } from "../../_actions/saveResumeActions";
 import toast from "react-hot-toast";
 
 export default function PersonalInfoForm() {

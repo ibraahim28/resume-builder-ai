@@ -3,11 +3,19 @@ import { Button } from "./ui/button";
 import { Loader2Icon, Wand2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const LoadingButton = ({ loading, disabled, className, children, ...rest }) => {
+const LoadingButton = ({
+  loading,
+  disabled,
+  className,
+  children,
+  title,
+  ...rest
+}) => {
   return (
     <Button
       disabled={loading || disabled}
       className={cn("flex gap-2 items-center", className)}
+      title={title ? title : ""}
       {...rest}
     >
       {loading ? (

@@ -14,10 +14,8 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useResumeStore } from "@/stores/useResumeStore";
-import { saveResume } from "../../_actions/actions";
+import { saveResume } from "../../_actions/saveResumeActions";
 import toast from "react-hot-toast";
-import { generateSummary } from "./actions";
-import { Button } from "@/components/ui/button";
 import GenerateSummaryBtn from "./generate-with-ai-btns/generateSummaryBtn";
 
 const SummaryForm = () => {
@@ -124,7 +122,7 @@ const SummaryForm = () => {
       <div className="space-y-1.5 text-center">
         <h2 className="text-2xl font-semibold">Professional Summary</h2>
         <p className="text-sm text-muted-foreground">
-          Create a compelling summary of your qualifications and experience.
+          Create a compelling summary of your qualifications or generate one with AI.
         </p>
         {saveStatus === "saving" && (
           <p className="text-xs text-amber-500">Saving...</p>
@@ -145,7 +143,20 @@ const SummaryForm = () => {
             name="summary"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Summary</FormLabel>
+                <div className="flex items-center justify-between">
+                  <FormLabel>Summary</FormLabel>
+                  <GenerateSummaryBtn
+                    resumes={resumes}
+                    currentResumeId={currentResumeId}
+                    onSummaryGenerated={(summary) =>
+                      form.setValue("summary", summary, {
+                        shouldDirty: true,
+                        shouldTouch: true,
+                        shouldValidate: true,
+                      })
+                    }
+                  />
+                </div>
                 <FormControl>
                   <Textarea
                     {...field}
@@ -158,17 +169,6 @@ const SummaryForm = () => {
                   most relevant qualifications
                 </FormDescription>
                 <FormMessage />
-                <GenerateSummaryBtn
-                  resumes={resumes}
-                  currentResumeId={currentResumeId}
-                  onSummaryGenerated={(summary) =>
-                    form.setValue("summary", summary, {
-                      shouldDirty: true,
-                      shouldTouch: true,
-                      shouldValidate: true,
-                    })
-                  }
-                />
               </FormItem>
             )}
           />

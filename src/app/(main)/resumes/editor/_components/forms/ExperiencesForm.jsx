@@ -26,7 +26,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import toast from "react-hot-toast";
-import { saveResume } from "../../_actions/actions";
+import { saveResume } from "../../_actions/saveResumeActions";
+import GenerateWorkExpBtn from "./generate-with-ai-btns/GenerateWorkExpBtn";
 
 export default function ExperiencesForm() {
   const {
@@ -37,10 +38,17 @@ export default function ExperiencesForm() {
     setHasWorkExperience,
     setIsSaving,
   } = useResumeStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const resumeStore = useResumeStore;
 
-  const resumeData = resumes[currentResumeId] || {};
   const hasWorkExperience = getHasWorkExperience();
+
+  const resumeData = resumes[currentResumeId] || {};
 
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState(null);
@@ -65,13 +73,14 @@ export default function ExperiencesForm() {
   ];
 
   const isFormEmpty = (entries) =>
-    !entries?.length || entries.every((entry) => {
+    !entries?.length ||
+    entries.every((entry) => {
       // For work experiences, check if any of the main fields have values
       if (hasWorkExperience) {
         return !entry.position && !entry.company && !entry.description;
       }
       // For projects, check if any of the main fields have values
-      return !entry.title && !entry.description && (!entry.techStack?.length);
+      return !entry.title && !entry.description && !entry.techStack?.length;
     });
 
   const form = useForm({
@@ -194,6 +203,7 @@ export default function ExperiencesForm() {
     control: form.control,
     name: hasWorkExperience ? "workExperiences" : "projects",
   });
+  if (!mounted) return null;
 
   const handleToggleExperience = () => {
     const projects = form.getValues("projects") || [];
@@ -270,11 +280,25 @@ export default function ExperiencesForm() {
           {fields.map((item, index) => (
             <Card key={item.id}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-medium ">
-                  {hasWorkExperience
-                    ? `Experience ${index + 1}`
-                    : `Project ${index + 1}`}
-                </CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg font-medium ">
+                    {hasWorkExperience
+                      ? `Experience ${index + 1}`
+                      : `Project ${index + 1}`}
+                  </CardTitle>
+
+                  <GenerateWorkExpBtn
+                    onWorkExperienceGenerated={(exp) => {
+                      const processedExp = {
+                        ...exp,
+                        description: Array.isArray(exp.description)
+                          ? exp.description.join("\n• ")
+                          : exp.description,
+                      };
+                      form.setValue(`workExperiences.${index}`, processedExp);
+                    }}
+                  />
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField

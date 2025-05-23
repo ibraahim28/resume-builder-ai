@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useResumeStore } from "@/stores/useResumeStore";
-import { saveResume } from "../../_actions/actions";
+import { saveResume } from "../../_actions/saveResumeActions";
 import toast from "react-hot-toast";
 
 const GeneralInfoForm = () => {

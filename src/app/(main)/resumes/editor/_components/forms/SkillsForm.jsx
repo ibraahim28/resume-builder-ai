@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { useResumeStore } from "@/stores/useResumeStore";
-import { saveResume } from "../../_actions/actions";
+import { saveResume } from "../../_actions/saveResumeActions";
 import toast from "react-hot-toast";
 
 const SkillsForm = () => {

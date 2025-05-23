@@ -22,7 +22,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useResumeStore } from "@/stores/useResumeStore";
-import { saveResume } from "../../_actions/actions";
+import { saveResume } from "../../_actions/saveResumeActions";
 import toast from "react-hot-toast";
 
 const EducationForm = () => {
