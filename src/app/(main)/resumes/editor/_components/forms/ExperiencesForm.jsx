@@ -28,6 +28,7 @@ import {
 import toast from "react-hot-toast";
 import { saveResume } from "../../_actions/saveResumeActions";
 import GenerateWorkExpBtn from "./generate-with-ai-btns/GenerateWorkExpBtn";
+import GenerateProjectBtn from "./generate-with-ai-btns/GenerateProjectBtn";
 
 export default function ExperiencesForm() {
   const {
@@ -286,18 +287,31 @@ export default function ExperiencesForm() {
                       ? `Experience ${index + 1}`
                       : `Project ${index + 1}`}
                   </CardTitle>
-
-                  <GenerateWorkExpBtn
-                    onWorkExperienceGenerated={(exp) => {
-                      const processedExp = {
-                        ...exp,
-                        description: Array.isArray(exp.description)
-                          ? exp.description.join("\n• ")
-                          : exp.description,
-                      };
-                      form.setValue(`workExperiences.${index}`, processedExp);
-                    }}
-                  />
+                  {hasWorkExperience ? (
+                    <GenerateWorkExpBtn
+                      onWorkExperienceGenerated={(exp) => {
+                        const processedExp = {
+                          ...exp,
+                          description: Array.isArray(exp.description)
+                            ? exp.description.join("\n• ")
+                            : exp.description,
+                        };
+                        form.setValue(`workExperiences.${index}`, processedExp);
+                      }}
+                    />
+                  ) : (
+                    <GenerateProjectBtn
+                      onProjectGenerated={(project) => {
+                        const processedProject = {
+                          ...project,
+                          description: Array.isArray(project.description)
+                            ? project.description.join("\n• ")
+                            : project.description,
+                        };
+                        form.setValue(`projects.${index}`, processedProject);
+                      }}
+                    />
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -425,7 +439,7 @@ export default function ExperiencesForm() {
                               Add at least 3 - 4 technologies you used to
                               develop this project
                             </FormDescription>
-                            {/* Preview added tech stacks */}
+
                             <div className="flex flex-wrap gap-2 mt-2">
                               {techStackArray.map((tech) => (
                                 <div
