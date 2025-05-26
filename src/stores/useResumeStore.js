@@ -39,6 +39,7 @@ const defaultResumeData = {
     educations: [
       {
         degree: "",
+        major: "",
         school: "",
         startDate: "",
         endDate: "",

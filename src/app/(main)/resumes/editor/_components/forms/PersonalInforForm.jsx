@@ -139,7 +139,7 @@ export default function PersonalInfoForm() {
           setSaveStatus("error");
           console.error("Error saving personal info:", error);
         }
-      }, 1000);
+      }, 2000);
     });
 
     return () => {

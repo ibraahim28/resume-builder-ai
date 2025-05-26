@@ -4,12 +4,15 @@ import { resumeSchema } from "@/lib/formValidations";
 import Resume from "@/models/Resume";
 import { currentUser } from "@clerk/nextjs/server";
 import { uploadToCloudinary, deleteFromCloudinary } from "@/lib/cloudinary";
+import connectToDatabase from "@/lib/db";
 
 export async function saveResume(currentResumeId, values) {
   try {
     const user = await currentUser();
     if (!user) throw new Error("User not authenticated");
     const userId = user.id;
+
+    connectToDatabase();
 
     console.log("Values ==========================", values);
 

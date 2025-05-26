@@ -39,8 +39,8 @@ const EducationPreviewSection = () => {
                   color: colorHex,
                 }}
               >
-                {" "}
-                {edu?.degree}{" "}
+                {edu?.degree}
+                {edu?.major ? ` in ${edu.major}` : ""}
               </span>
               {edu.startDate && (
                 <span>
