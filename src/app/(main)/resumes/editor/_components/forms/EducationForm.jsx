@@ -112,6 +112,7 @@ const EducationForm = () => {
               currentResumeId,
               updatedResumes[currentResumeId]
             );
+            console.log("result-----------------", result);
 
             if (!result.success) {
               toast.error("Error saving Resume");
@@ -130,7 +131,7 @@ const EducationForm = () => {
           setIsSaving(false);
           setSaveStatus("error");
         }
-      }, 1000);
+      }, 2000);
     });
 
     return () => {
@@ -184,7 +185,20 @@ const EducationForm = () => {
                     <FormItem>
                       <FormLabel>Degree</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Bachelor of Science" />
+                        <Input {...field} placeholder="Your degree" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`educations.${index}.major`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Major/Field of study</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Your Major" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -197,7 +211,7 @@ const EducationForm = () => {
                     <FormItem>
                       <FormLabel>School/University</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Harvard University" />
+                        <Input {...field} placeholder="Your University" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

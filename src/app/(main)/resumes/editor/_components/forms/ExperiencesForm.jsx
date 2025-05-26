@@ -191,7 +191,7 @@ export default function ExperiencesForm() {
           setIsSaving(false);
           setSaveStatus("error");
         }
-      }, 1000);
+      }, 2000);
     });
 
     return () => {
