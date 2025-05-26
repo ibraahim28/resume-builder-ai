@@ -5,7 +5,7 @@ import axiosInstance from "@/lib/axios";
 import ResumeLayout from "./ResumeLayout";
 import { getSortedResumes } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { AlarmClock } from "lucide-react";
+import { LucideUpload } from "lucide-react";
 
 const MyResume = () => {
   const [selectedMode, setSelectedMode] = useState("draft");
@@ -33,10 +33,10 @@ const MyResume = () => {
       <div className="mb-2">
         <h2 className="text-blue-950 text-xl font-semibold">My Resume</h2>
       </div>
-      <div className="flex justify-between border-b-2 border-gray-200">
-        <div className="py-2 flex gap-6">
+      <div className="flex flex-col sm:flex-row justify-between border-b-2 border-gray-200 gap-3 sm:gap-0">
+        <div className="py-2 flex gap-4 sm:gap-6">
           <button
-            className={`text-lg text-gray-800 font-semibold cursor-pointer ${
+            className={`text-base sm:text-lg text-gray-800 font-semibold cursor-pointer ${
               selectedMode === "draft" && "text-green-600"
             }`}
             onClick={() => setSelectedMode("draft")}
@@ -44,7 +44,7 @@ const MyResume = () => {
             Draft
           </button>
           <button
-            className={`text-lg text-gray-800 font-semibold cursor-pointer ${
+            className={`text-base sm:text-lg text-gray-800 font-semibold cursor-pointer ${
               selectedMode === "completed" && "text-green-600"
             }`}
             onClick={() => setSelectedMode("completed")}
@@ -52,9 +52,15 @@ const MyResume = () => {
             Completed
           </button>
         </div>
-        <Button className="bg-blue-100 text-primary hover:bg-blue-200">
-          <AlarmClock /> Add Reminder
-        </Button>
+        <div>
+          <label
+            htmlFor="import-resume"
+            className="bg-blue-100 flex px-3 py-2 rounded-md text-primary hover:bg-blue-200 text-xs sm:text-sm w-full sm:w-auto mb-2 sm:mb-0"
+          >
+            <LucideUpload size={16} className="h-4 w-4 mr-1" /> Import Resume
+          </label>
+          <input type="file" name="import-resume" className="hidden" />
+        </div>
       </div>
 
       <ResumeLayout resumes={sorted} />
