@@ -1,6 +1,5 @@
 "use client";
 
-
 import { Plus } from "lucide-react";
 import Image from "next/image";
 import { useResumeStore } from "@/stores/useResumeStore";
@@ -25,8 +24,6 @@ const ResumeLayout = ({ resumes }) => {
     router.push("/resumes/editor");
   };
 
-  const placeholderImage = "/resume.jpeg";
-
   const navigateToResume = (id) => {
     router.push(`/resumes/editor?resumeId=${id}`);
   };
@@ -39,9 +36,11 @@ const ResumeLayout = ({ resumes }) => {
     <div className="container mx-auto px-2 sm:px-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 pt-2 pb-6">
         <div onClick={addNewResume} className="w-full h-full">
-          <div className="h-full bg-white rounded-lg shadow-md p-3 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow cursor-pointer border-2 border-dashed border-gray-300">
-            <Plus size={60} className="text-gray-400 my-2" />
-            <h2 className="text-sm font-semibold text-gray-500">Add New</h2>
+          <div className="h-full bg-white rounded-lg shadow-md p-3 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow cursor-pointer border border-gray-200">
+            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+              <Plus size={30} className="text-blue-600" />
+            </div>
+            <h2 className="text-sm font-semibold text-gray-700">Add New</h2>
           </div>
         </div>
         {resumesState.map((resume) => {
@@ -53,6 +52,7 @@ const ResumeLayout = ({ resumes }) => {
               setOpenMenuId={setOpenMenuId}
               toggleMenu={toggleMenu}
               navigateToResume={navigateToResume}
+              resumesState={resumesState}
               setResumesState={setResumesState}
             />
           );

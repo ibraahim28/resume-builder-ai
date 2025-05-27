@@ -3,12 +3,15 @@ import React from "react";
 import { Badge } from "./ui/badge";
 import { BorderStyles } from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
 
-const SkillsPreviewSection = () => {
+const SkillsPreviewSection = ({ skills: skillsProp, appearance }) => {
   const { resumes, currentResumeId } = useResumeStore();
-  const resumeData = resumes[currentResumeId] || {};
+  
+  // If props are not provided, fall back to the Zustand store
+  const skillsData = skillsProp || (resumes[currentResumeId]?.skills || {});
+  const appearanceData = appearance || (resumes[currentResumeId]?.appearance || {});
 
-  const skills = resumeData?.skills?.skills || [];
-  const { colorHex, borderStyle } = resumeData?.appearance || {};
+  const skills = skillsData?.skills || [];
+  const { colorHex, borderStyle } = appearanceData;
   if (!skills.length) return null;
   return (
     <>

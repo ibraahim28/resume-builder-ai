@@ -5,7 +5,7 @@ import { WandSparklesIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { generateWorkExperience } from "../../../_actions/AiActions";
+import { generateWorkExperience } from "../../../_actions/generateWorkExpAction";
 import {
   Dialog,
   DialogHeader,

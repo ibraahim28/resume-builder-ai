@@ -4,7 +4,17 @@ const nextConfig = {
         serverActions : {
             bodySizeLimit : '4mb',
         }
-    }
+    },
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'res.cloudinary.com',
+                port: '',
+                pathname: '**',
+            },
+        ],
+    },
 };
 
 export default nextConfig;

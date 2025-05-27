@@ -7,7 +7,7 @@ import {
 import { useResumeStore } from "@/stores/useResumeStore";
 import { Gauge, ShieldCheck } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { analyzeResume } from "../_actions/AiActions";
+import { analyzeResume } from "../_actions/analyzeResumeAction";
 
 const ResumeEnhancer = () => {
   const { resumes, currentResumeId } = useResumeStore();

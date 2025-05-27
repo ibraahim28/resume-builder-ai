@@ -3,9 +3,12 @@ import { useResumeStore } from "@/stores/useResumeStore";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
-const PersonalInfoPreviewSection = () => {
+const PersonalInfoPreviewSection = ({ personalInfo, appearance }) => {
   const { resumes, currentResumeId } = useResumeStore();
-  const resumeData = resumes[currentResumeId] || {};
+  
+  // If props are not provided, fall back to the Zustand store
+  const personalInfoData = personalInfo || (resumes[currentResumeId]?.personalInfo || {});
+  const appearanceData = appearance || (resumes[currentResumeId]?.appearance || {});
 
   const {
     photo = null,
@@ -16,9 +19,9 @@ const PersonalInfoPreviewSection = () => {
     country = "",
     phone = "",
     email = "",
-  } = resumeData?.personalInfo || {};
+  } = personalInfoData;
 
-  const { colorHex = "", borderStyle = "" } = resumeData?.appearance || {};
+  const { colorHex = "", borderStyle = "" } = appearanceData;
 
   const [photoSrc, setPhotoSrc] = useState("");
 
