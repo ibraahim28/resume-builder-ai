@@ -1,63 +1,71 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";
 import ResumeLayout from "./ResumeLayout";
 import { getSortedResumes } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { AlarmClock } from "lucide-react";
+import ResumeItemSkeleton from "./ResumeItemSkeleton";
 
 const MyResume = () => {
-  const [selectedMode, setSelectedMode] = useState("draft");
   const [resumes, setResumes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
 
-  useEffect(() => {
-    const fetchResumes = async () => {
-      try {
-        const res = await axiosInstance.get("/resumes/fetch-all");
-        setResumes(res.data.resumes);
-      } catch (error) {
-        console.error("Error fetching resumes:", error);
-      }
-    };
-
-    fetchResumes();
+  const fetchResumes = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await axiosInstance.get("/resumes/fetch-all");
+      setResumes(res.data.resumes);
+    } catch (error) {
+      console.error("Error fetching resumes:", error);
+      setError(error);
+      toast.error("Failed to load resumes. Please try again");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const filtered = resumes.filter((resume) =>
-    selectedMode === "draft" ? !resume.completed : resume.completed
-  );
-  const sorted = getSortedResumes(filtered);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchResumes();
+
+    return () => controller.abort();
+  }, [fetchResumes, retryCount]);
+
+  // Add error state UI
+  if (error) {
+    return (
+      <div className="container mx-auto px-2 sm:px-4 text-center py-8">
+        <p className="text-red-500 mb-4">Failed to load resumes</p>
+        <LoadingButton 
+          onClick={() => setRetryCount(prev => prev + 1)}
+          className="bg-red-100 text-red-600 hover:bg-red-200"
+        >
+          Retry Loading
+        </LoadingButton>
+      </div>
+    );
+  }
+
+  const sorted = getSortedResumes(resumes);
+
   return (
     <div>
-      <div className="mb-2">
-        <h2 className="text-blue-950 text-xl font-semibold">My Resume</h2>
-      </div>
-      <div className="flex justify-between border-b-2 border-gray-200">
-        <div className="py-2 flex gap-6">
-          <button
-            className={`text-lg text-gray-800 font-semibold cursor-pointer ${
-              selectedMode === "draft" && "text-green-600"
-            }`}
-            onClick={() => setSelectedMode("draft")}
-          >
-            Draft
-          </button>
-          <button
-            className={`text-lg text-gray-800 font-semibold cursor-pointer ${
-              selectedMode === "completed" && "text-green-600"
-            }`}
-            onClick={() => setSelectedMode("completed")}
-          >
-            Completed
-          </button>
+      {loading ? (
+        <div className="container mx-auto px-2 sm:px-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 pt-2 pb-6">
+            {Array(5)
+              .fill(0)
+              .map((_, index) => (
+                <ResumeItemSkeleton key={index} />
+              ))}
+          </div>
         </div>
-        <Button className="bg-blue-100 text-primary hover:bg-blue-200">
-          <AlarmClock /> Add Reminder
-        </Button>
-      </div>
-
-      <ResumeLayout resumes={sorted} />
+      ) : (
+        <ResumeLayout resumes={sorted} />
+      )}
     </div>
   );
 };

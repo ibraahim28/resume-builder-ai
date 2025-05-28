@@ -1,6 +1,7 @@
 import React from "react";
 import MyResume from "./_components/MyResume";
 import AddNewResumeBtn from "./_components/AddNewResumeBtn";
+import ImportResumeBtn from "./_components/ImportResumeBtn";
 
 export const metadata = {
   title: "Your Resumes",
@@ -16,8 +17,13 @@ const Page = () => {
             Create your own custom resume and land your dream job
           </p>
         </div>
-        <div>
-         <AddNewResumeBtn />
+        <div className="flex gap-4">
+          <div>
+            <ImportResumeBtn />
+          </div>
+          <div className="w-full sm:w-auto">
+            <AddNewResumeBtn />
+          </div>
         </div>
       </div>
       <MyResume />
