@@ -15,7 +15,11 @@ const AddNewResumeBtn = () => {
   };
 
   return (
-    <Button onClick={addNewResume} className="flex items-center gap-2" size={"lg"}>
+    <Button
+      onClick={addNewResume}
+      className="flex items-center gap-2"
+      size={"lg"}
+    >
       <Plus size={20} /> New Resume
     </Button>
   );
