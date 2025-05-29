@@ -1,8 +1,6 @@
 import React from "react";
 import MyResume from "./_components/MyResume";
 import AddNewResumeBtn from "./_components/AddNewResumeBtn";
-import { LucideUpload } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import ImportResumeBtn from "./_components/ImportResumeBtn";
 
 export const metadata = {
@@ -23,7 +21,9 @@ const Page = () => {
         </div>
         <div className="flex gap-4">
           <div>
+
           <ImportResumeBtn />
+
           </div>
           <div className="w-full sm:w-auto">
             <AddNewResumeBtn />

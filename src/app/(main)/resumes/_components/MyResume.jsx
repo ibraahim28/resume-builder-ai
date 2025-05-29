@@ -56,7 +56,8 @@ const MyResume = () => {
       {loading ? (
         <div className="container mx-auto px-2 sm:px-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 pt-2 pb-6">
-            {Array(6)
+
+            {Array(5)
               .fill(0)
               .map((_, index) => (
                 <ResumeItemSkeleton key={index} />

@@ -1,41 +1,51 @@
-import { NextResponse } from "next/server";
-import connectToDatabase from "@/lib/db/index";
+
+import connectToDatabase from "@/lib/db";
 import Resume from "@/models/Resume";
+import { auth } from "@clerk/nextjs/dist/types/server";
 
 export async function DELETE(req) {
   try {
-      const { resumeId } = await req.json();
-    console.log("DELETE api hit!!!!!!!",resumeId )
-    await connectToDatabase();
+    const { userId } = auth();
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
-
-
+    const { resumeId } = await req.json();
     if (!resumeId) {
-      return NextResponse.json(
-        { error: "Resume ID is required" },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ success: false, message: "Resume ID is required" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+    await connectToDatabase();
+    const result = await Resume.findOneAndDelete({ resumeId });
+    if (!result) {
+      return new Response(
+        JSON.stringify({ success: false, message: "Resume not found" }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }
       );
     }
 
-    const deletedResume = await Resume.findOneAndDelete({resumeId});
-
-    if (!deletedResume) {
-      return NextResponse.json(
-        { error: "Resume not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(
-      { success: true, message: "Resume deleted successfully" },
-      
+    return new Response(
+      JSON.stringify({ success: true, message: "Resume deleted successfully" }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
     );
-
   } catch (error) {
     console.error("Error deleting resume:", error);
-    return NextResponse.json(
-      { error: "Failed to delete resume" },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ success: false, message: "Internal Server Error" })
     );
   }
 }

@@ -1,14 +1,14 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import Image from "next/image";
+
 import { useResumeStore } from "@/stores/useResumeStore";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ResumeItem from "./ResumeItem";
+import AddNewResumeBtn from "./AddNewResumeBtn";
+
 
 const ResumeLayout = ({ resumes }) => {
-  const { addResume } = useResumeStore();
   const [openMenuId, setOpenMenuId] = useState(null);
 
   const [resumesState, setResumesState] = useState(resumes);
@@ -23,6 +23,7 @@ const ResumeLayout = ({ resumes }) => {
     addResume();
     router.push("/resumes/editor");
   };
+
 
   const navigateToResume = (id) => {
     router.push(`/resumes/editor?resumeId=${id}`);
@@ -57,6 +58,7 @@ const ResumeLayout = ({ resumes }) => {
             />
           );
         })}
+
       </div>
     </div>
   );
