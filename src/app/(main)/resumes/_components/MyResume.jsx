@@ -5,6 +5,8 @@ import axiosInstance from "@/lib/axios";
 import ResumeLayout from "./ResumeLayout";
 import { getSortedResumes } from "@/lib/utils";
 import ResumeItemSkeleton from "./ResumeItemSkeleton";
+import toast from "react-hot-toast";
+import LoadingButton from "@/components/LoadingButton";
 
 const MyResume = () => {
   const [resumes, setResumes] = useState([]);
@@ -28,19 +30,19 @@ const MyResume = () => {
   }, []);
 
   useEffect(() => {
-    const controller = new AbortController();
     fetchResumes();
-
-    return () => controller.abort();
   }, [fetchResumes, retryCount]);
 
-  // Add error state UI
+  const sorted = getSortedResumes(resumes);
+
   if (error) {
     return (
-      <div className="container mx-auto px-2 sm:px-4 text-center py-8">
-        <p className="text-red-500 mb-4">Failed to load resumes</p>
-        <LoadingButton 
-          onClick={() => setRetryCount(prev => prev + 1)}
+      <div className="container mx-auto px-4 text-center py-12">
+        <p className="text-red-500 mb-4 text-sm sm:text-base">
+          Failed to load resumes.
+        </p>
+        <LoadingButton
+          onClick={() => setRetryCount((prev) => prev + 1)}
           className="bg-red-100 text-red-600 hover:bg-red-200"
         >
           Retry Loading
@@ -49,20 +51,15 @@ const MyResume = () => {
     );
   }
 
-  const sorted = getSortedResumes(resumes);
-
   return (
-    <div>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
       {loading ? (
-        <div className="container mx-auto px-2 sm:px-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 pt-2 pb-6">
-
-            {Array(5)
-              .fill(0)
-              .map((_, index) => (
-                <ResumeItemSkeleton key={index} />
-              ))}
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {Array(5)
+            .fill(0)
+            .map((_, index) => (
+              <ResumeItemSkeleton key={index} />
+            ))}
         </div>
       ) : (
         <ResumeLayout resumes={sorted} />

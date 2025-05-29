@@ -11,7 +11,7 @@ const AddNewResumeBtn = () => {
 
   const addNewResume = () => {
     addResume();
-    router.push("resumes/editor");
+    router.push("/editor");
   };
 
   return (

@@ -1,7 +1,7 @@
 import { useResumeStore } from "@/stores/useResumeStore";
 import React from "react";
 import { formatDate } from "date-fns";
-import { BorderStyles } from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
+import { BorderStyles } from "@/app/(main)/editor/_components/BorderStyleButton";
 import { Badge } from "./ui/badge";
 
 const ExperiencesPreviewSection = ({ workExperience, project, appearance, hasWorkExperience: hasWorkExperienceProp }) => {

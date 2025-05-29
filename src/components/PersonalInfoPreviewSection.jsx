@@ -1,4 +1,4 @@
-import { BorderStyles } from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
+import { BorderStyles } from "@/app/(main)/editor/_components/BorderStyleButton";
 import { useResumeStore } from "@/stores/useResumeStore";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";

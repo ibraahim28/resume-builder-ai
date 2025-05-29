@@ -9,9 +9,6 @@ export default function Home() {
       <Link className="bg-primary" href={'/resumes'}>
       Resumes
       </Link>
-      <Link className="bg-primary" href={'/resumes/editor'}>
-      Editor
-      </Link>
     </div>
   );
 }

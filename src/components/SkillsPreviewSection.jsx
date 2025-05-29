@@ -1,7 +1,7 @@
 import { useResumeStore } from "@/stores/useResumeStore";
 import React from "react";
 import { Badge } from "./ui/badge";
-import { BorderStyles } from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
+import { BorderStyles } from "@/app/(main)/editor/_components/BorderStyleButton";
 
 const SkillsPreviewSection = ({ skills: skillsProp, appearance }) => {
   const { resumes, currentResumeId } = useResumeStore();

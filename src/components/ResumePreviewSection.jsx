@@ -1,9 +1,9 @@
 import React from "react";
 import ResumePreview from "./ResumePreview";
-import ColorPicker from "@/app/(main)/resumes/editor/_components/ColorPicker";
-import BorderStyleButton from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
+import ColorPicker from "@/app/(main)/editor/_components/ColorPicker";
+import BorderStyleButton from "@/app/(main)/editor/_components/BorderStyleButton";
 import { cn } from "@/lib/utils";
-import ResumeEnhancerBtn from "@/app/(main)/resumes/editor/_components/ResumeEnhancer";
+import ResumeEnhancerBtn from "@/app/(main)/editor/_components/ResumeEnhancer";
 import { useResumeStore } from "@/stores/useResumeStore";
 
 const ResumePreviewSection = ({ showPreviewOnSmDevice, resumeData }) => {

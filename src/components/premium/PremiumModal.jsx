@@ -1,14 +1,12 @@
+"use client"
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { CheckCircle2 } from "lucide-react";
+import usePremiumModal from "@/stores/usePremiumModal";
 
 const PremiumModal = () => {
+  const { open, setOpen } = usePremiumModal();
   const features = {
     basic: [
       "Create & download 1 resume",
@@ -37,7 +35,7 @@ const PremiumModal = () => {
   );
 
   return (
-    <Dialog open>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="w-full overflow-y-auto max-h-[95vh] lg:max-w-2xl md:p-6 p-4">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">

@@ -1,9 +1,27 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import axiosInstance from "@/lib/axios";
 import { LucideUpload } from "lucide-react";
 import React from "react";
 
 const ImportResumeBtn = () => {
+  const handleUpload = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+
+      const res = await axiosInstance.post("/upload-resume", formData, {
+        headers: {
+          "Content-type": "multipart/formData",
+        },
+      });
+
+      const structuredResume = res.data.resume;
+      console.log("Parsed resume:", structuredResume);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <Button
@@ -13,7 +31,13 @@ const ImportResumeBtn = () => {
       >
         <LucideUpload size={16} className="h-4 w-4 mr-1" /> Import Resume
       </Button>
-      <input type="file" id="import-resume" className="hidden" />
+      <input
+        type="file"
+        id="import-resume"
+        className="hidden"
+        accept="application/pdf"
+        onChange={(e) => handleUpload(e.target.files[0])}
+      />
     </>
   );
 };
