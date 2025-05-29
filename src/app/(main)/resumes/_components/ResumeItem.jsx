@@ -54,6 +54,8 @@ const ResumeItem = ({
               Print
             </button>
             <button
+
+
               onClick={async () => {
                 try {
                   setIsDeleting(true);
@@ -85,6 +87,7 @@ const ResumeItem = ({
                   setIsDeleting(false);
                 }
               }}
+
               className={`w-full px-4 py-2 hover:bg-gray-100 text-left ${isDeleting ? "text-red-200" : "text-red-500"} `}
               disabled={isDeleting}
             >
@@ -98,6 +101,7 @@ const ResumeItem = ({
           onClick={() => navigateToResume(resume.resumeId)}
         >
           <div className="w-full aspect-[4/5] relative mb-2 sm:mb-3">
+
             <ResumePreview resumeData={resume.data} contentRef={contentRef} />
           </div>
           <h2 className="text-sm font-semibold truncate w-full">

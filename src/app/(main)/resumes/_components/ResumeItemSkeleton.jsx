@@ -2,6 +2,7 @@ import React from 'react';
 
 const ResumeItemSkeleton = () => {
   return (
+
     <div className="w-full relative">
       <div className="absolute top-2 right-2 z-10 text-gray-300">
         <div className="w-4 h-4 rounded-full bg-gray-200 animate-pulse" />
@@ -21,5 +22,6 @@ const ResumeItemSkeleton = () => {
     </div>
   );
 };
+
 
 export default ResumeItemSkeleton;

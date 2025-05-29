@@ -106,7 +106,7 @@ const GeneralInfoForm = () => {
           setIsSaving(false);
           setSaveStatus("error");
         }
-      }, 500);
+      }, 2000);
     });
 
     return () => {

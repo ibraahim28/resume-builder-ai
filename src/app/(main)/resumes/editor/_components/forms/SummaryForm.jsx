@@ -108,7 +108,7 @@ const SummaryForm = () => {
           setIsSaving(false);
           setSaveStatus("error");
         }
-      }, 1000);
+      }, 2000);
     });
 
     return () => {

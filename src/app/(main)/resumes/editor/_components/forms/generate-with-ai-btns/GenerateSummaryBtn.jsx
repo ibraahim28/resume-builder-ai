@@ -1,6 +1,6 @@
 import LoadingButton from "@/components/LoadingButton";
 import React, { useState } from "react";
-import { generateSummary } from "../../../_actions/AiActions";
+import { generateSummary } from "../../../_actions/generateSummaryAction";
 import toast from "react-hot-toast";
 
 const GenerateSummaryBtn = ({

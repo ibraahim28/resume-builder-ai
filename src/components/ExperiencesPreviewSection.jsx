@@ -4,14 +4,18 @@ import { formatDate } from "date-fns";
 import { BorderStyles } from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
 import { Badge } from "./ui/badge";
 
-const ExperiencesPreviewSection = () => {
+const ExperiencesPreviewSection = ({ workExperience, project, appearance, hasWorkExperience: hasWorkExperienceProp }) => {
   const { resumes, currentResumeId, getHasWorkExperience } = useResumeStore();
-  const resumeData = resumes[currentResumeId] || {};
-  const hasWorkExperience = getHasWorkExperience();
+  
+  // If props are not provided, fall back to the Zustand store
+  const workExperienceData = workExperience || (resumes[currentResumeId]?.workExperience || {});
+  const projectData = project || (resumes[currentResumeId]?.project || {});
+  const appearanceData = appearance || (resumes[currentResumeId]?.appearance || {});
+  const hasWorkExperience = hasWorkExperienceProp !== undefined ? hasWorkExperienceProp : getHasWorkExperience();
 
-  const workExperiences = resumeData?.workExperience?.workExperiences || [];
-  const projects = resumeData?.project?.projects || [];
-  const { colorHex, borderStyle } = resumeData?.appearance || {};
+  const workExperiences = workExperienceData?.workExperiences || [];
+  const projects = projectData?.projects || [];
+  const { colorHex, borderStyle } = appearanceData;
 
   const getNonEmptyExperiences = (list = []) =>
     list.filter((exp) => exp && Object.values(exp).some(Boolean));
@@ -97,7 +101,7 @@ const ExperiencesPreviewSection = () => {
               <p className="text-xs font-normal text-gray-500">{exp.company}</p>
             )}
             {exp.description && (
-              <p className="text-sm/relaxed whitespace-pre-line text-muted-foreground ">
+              <p className="text-sm/relaxed whitespace-pre-line text-gray-600 ">
                 {exp.description}
               </p>
             )}

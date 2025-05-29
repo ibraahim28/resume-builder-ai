@@ -1,12 +1,15 @@
 import { useResumeStore } from "@/stores/useResumeStore";
 import React from "react";
 
-const SummaryPreviewSection = () => {
+const SummaryPreviewSection = ({ summary: summaryProp, appearance }) => {
   const { resumes, currentResumeId } = useResumeStore();
-  const resumeData = resumes[currentResumeId] || {};
+  
+  // If props are not provided, fall back to the Zustand store
+  const summaryData = summaryProp || (resumes[currentResumeId]?.summary || {});
+  const appearanceData = appearance || (resumes[currentResumeId]?.appearance || {});
 
-  const { summary } = resumeData?.summary || {};
-  const { colorHex } = resumeData?.appearance || {};
+  const { summary } = summaryData;
+  const { colorHex } = appearanceData;
 
   if (!summary) return null;
 

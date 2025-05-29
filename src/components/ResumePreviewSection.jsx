@@ -4,7 +4,9 @@ import ColorPicker from "@/app/(main)/resumes/editor/_components/ColorPicker";
 import BorderStyleButton from "@/app/(main)/resumes/editor/_components/BorderStyleButton";
 import { cn } from "@/lib/utils";
 import ResumeEnhancerBtn from "@/app/(main)/resumes/editor/_components/ResumeEnhancer";
-const ResumePreviewSection = ({ showPreviewOnSmDevice }) => {
+import { useResumeStore } from "@/stores/useResumeStore";
+
+const ResumePreviewSection = ({ showPreviewOnSmDevice, resumeData }) => {
   return (
     <div
       className={cn(
@@ -18,7 +20,7 @@ const ResumePreviewSection = ({ showPreviewOnSmDevice }) => {
         <ResumeEnhancerBtn />
       </div>
       <div className="flex w-full justify-center overflow-y-auto bg-secondary p-3">
-        <ResumePreview classname={"max-w-2xl shadow-md"} />
+        <ResumePreview classname={"max-w-2xl shadow-md"} resumeData={resumeData} />
       </div>
     </div>
   );

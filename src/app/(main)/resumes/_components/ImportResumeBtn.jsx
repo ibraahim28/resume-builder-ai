@@ -1,32 +1,20 @@
 "use client";
-import React from "react";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { LucideUpload } from "lucide-react";
+import React from "react";
 
 const ImportResumeBtn = () => {
-  const handleImport = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/pdf";
-    input.onchange = (event) => {
-      const file = event.target.files?.[0];
-      if (file) {
-        // Handle file upload logic here
-        console.log("Selected PDF:", file.name);
-      }
-    };
-    input.click();
-  };
-
   return (
-    <Button
-      onClick={handleImport}
-      className="flex items-center gap-2 bg-blue-100 text-gray-700 hover:bg-gray-200"
-      variant="outline"
-      size="lg"
-    >
-      <Upload size={18} /> Import PDF
-    </Button>
+    <>
+      <Button
+        size="lg"
+        onClick={() => document.getElementById("import-resume").click()}
+        className="bg-blue-100 flex px-3 py-2 rounded-md text-primary hover:bg-blue-200 text-xs sm:text-sm w-full sm:w-auto mb-2 sm:mb-0"
+      >
+        <LucideUpload size={16} className="h-4 w-4 mr-1" /> Import Resume
+      </Button>
+      <input type="file" id="import-resume" className="hidden" />
+    </>
   );
 };
 

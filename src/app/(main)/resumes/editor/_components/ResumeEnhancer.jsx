@@ -5,9 +5,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useResumeStore } from "@/stores/useResumeStore";
-import { Gauge, Lightbulb, ShieldCheck, ShieldAlert } from "lucide-react";
+import { Gauge, ShieldCheck } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { analyzeResume } from "../_actions/AiActions";
+import { analyzeResume } from "../_actions/analyzeResumeAction";
 
 const ResumeEnhancer = () => {
   const { resumes, currentResumeId } = useResumeStore();
@@ -15,8 +15,8 @@ const ResumeEnhancer = () => {
   const [scoreData, setScoreData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const resumeData = resumes[currentResumeId] || {};
+  const resumeData =
+    { ...resumes[currentResumeId], resumeId: currentResumeId } || {};
 
   useEffect(() => {
     if (showPopover && !scoreData) {
@@ -28,7 +28,7 @@ const ResumeEnhancer = () => {
     try {
       setLoading(true);
       setError("");
-      const result = await analyzeResume(resumeData);
+      const result = await analyzeResume(resumeData, currentResumeId);
       setScoreData(result);
     } catch (err) {
       console.log(err);
@@ -50,7 +50,41 @@ const ResumeEnhancer = () => {
           <Gauge className="size-5" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent side="left" className="w-96 my-4 max-h-[calc(100vh-100px)] overflow-y-auto p-6 pb-10 space-y-4">
+      <PopoverContent
+        side="left"
+        className="w-96 my-4 max-h-[calc(100vh-100px)] overflow-y-auto p-6 pb-10 space-y-4"
+      >
+        <div className="mb-2 p-2 rounded bg-yellow-50 border border-yellow-300 text-yellow-800 text-xs">
+          AI-generated analysis may sometimes be inaccurate or hallucinated. If
+          you notice any issues, please leave feedback and we'll work to improve
+          it.
+        </div>
+        {/* Refresh button */}
+        <div className="flex justify-end mb-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={loadScore}
+            disabled={loading}
+            className="gap-1"
+            title="Refresh analysis"
+          >
+            <svg
+              className="inline-block w-4 h-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 4v5h.582M20 20v-5h-.581M5.635 19A9 9 0 1 0 6 6.07"
+              />
+            </svg>
+            Refresh
+          </Button>
+        </div>
         {loading ? (
           <div className="text-center py-4">Analyzing resume...</div>
         ) : error ? (
@@ -71,13 +105,13 @@ const ResumeEnhancer = () => {
                     cx="50%"
                     cy="50%"
                     r="45"
-                    className="fill-none stroke-blue-600"
+                    className={`fill-none ${scoreData.scoreChange > 0 ? "stroke-green-600" : scoreData.scoreChange < 0 ? "stroke-red-600" : "stroke-blue-600"}`}
                     strokeWidth="8"
                     strokeDasharray={`${(scoreData.score / 100) * 283} 283`}
                     transform="rotate(-90 48 48)"
                   />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-2xl font-bold">{scoreData.score}</span>
                 </div>
               </div>
@@ -89,8 +123,15 @@ const ResumeEnhancer = () => {
                     ? "Needs improvements"
                     : "Major revisions needed"}
               </p>
+              {scoreData.implementedSuggestions?.length > 0 && (
+                <div className="mt-2 text-sm text-green-600">
+                  <p>
+                    ✓ {scoreData.implementedSuggestions.length} suggestions
+                    implemented
+                  </p>
+                </div>
+              )}
             </div>
-
             {/* Breakdown Section */}
             <div className="flex flex-col gap-4">
               <div className="space-y-2">
@@ -110,10 +151,8 @@ const ResumeEnhancer = () => {
                 </div>
               </div>
             </div>
-
             <div className="space-y-3">
               <div className="flex items-start gap-2 text-sm">
-                <Lightbulb className="size-4 text-yellow-600" />
                 <div>
                   <h4 className="font-medium mb-1">Improvement Tips</h4>
                   <ul className="space-y-2">

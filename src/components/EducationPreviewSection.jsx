@@ -2,12 +2,15 @@ import { useResumeStore } from "@/stores/useResumeStore";
 import { formatDate } from "date-fns";
 import React from "react";
 
-const EducationPreviewSection = () => {
+const EducationPreviewSection = ({ education: educationProp, appearance }) => {
   const { resumes, currentResumeId } = useResumeStore();
-  const resumeData = resumes[currentResumeId] || {};
+  
+  // If props are not provided, fall back to the Zustand store
+  const educationData = educationProp || (resumes[currentResumeId]?.education || {});
+  const appearanceData = appearance || (resumes[currentResumeId]?.appearance || {});
 
-  const educations = resumeData?.education?.educations || [];
-  const { colorHex } = resumeData?.appearance || {};
+  const educations = educationData?.educations || [];
+  const { colorHex } = appearanceData;
 
   const educationsNotEmpty = educations.filter(
     (edu) => Object.values(edu).filter(Boolean).length > 0
@@ -39,8 +42,8 @@ const EducationPreviewSection = () => {
                   color: colorHex,
                 }}
               >
-                {" "}
-                {edu?.degree}{" "}
+                {edu?.degree}
+                {edu?.major ? ` in ${edu.major}` : ""}
               </span>
               {edu.startDate && (
                 <span>
