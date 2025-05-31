@@ -1,7 +1,7 @@
 
 import connectToDatabase from "@/lib/db";
 import Resume from "@/models/Resume";
-import { auth } from "@clerk/nextjs/dist/types/server";
+import { auth } from "@clerk/nextjs/server";
 
 export async function DELETE(req) {
   try {

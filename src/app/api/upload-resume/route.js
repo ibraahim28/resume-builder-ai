@@ -1,10 +1,12 @@
+export const runtime = "nodejs";
+
 import { NextResponse } from "next/server";
-import { getStructuredResume } from "@/app/(main)/resumes/_actions/getStructuredResume";
+import formidable from "formidable";
+import { Readable } from "stream";
 import { parsePdfText } from "@/lib/pdf";
-import { readFile } from "fs/promises";
-import { IncomingForm } from "formidable";
-import { join } from "path";
-import { mkdirSync, existsSync } from "fs";
+import { getStructuredResume } from "@/app/(main)/resumes/_actions/getStructuredResume";
+import fs from "fs";
+import path from "path";
 
 export const config = {
   api: {
@@ -12,63 +14,82 @@ export const config = {
   },
 };
 
-const uploadDir = join(process.cwd(), "/tmp/uploads");
+async function streamToNodeRequest(request) {
+  const readable = Readable.from(request.body);
 
-export async function POST(req) {
-  try {
-    console.log("UPLOAD DIRECTORY______________________________________________________________", uploadDir);
-    if (!existsSync(uploadDir)) mkdirSync(uploadDir, { recursive: true });
+  readable.headers = {
+    "content-type": request.headers.get("content-type") || "",
+    "content-length": request.headers.get("content-length") || "0",
+  };
+  readable.method = request.method;
 
-    const formData = await new Promise((resolve, reject) => {
-      const form = new IncomingForm({ uploadDir, keepExtensions: true });
-      form.parse(req, (err, fields, files) => {
-        if (err) reject(err);
-        else resolve({ fields, files });
-      });
+  return readable;
+}
+
+function parseForm(req) {
+  const uploadDir = path.join(process.cwd(), "tmp", "uploads");
+
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+
+  return new Promise((resolve, reject) => {
+    const form = formidable({
+      uploadDir,
+      keepExtensions: true,
+      multiples: false,
     });
 
-    console.log("FORMDATA__________________________________", formData);
+    form.parse(req, (err, fields, files) => {
+      if (err) reject(err);
+      else resolve({ fields, files });
+    });
+  });
+}
 
-    const file = formData?.files?.resume;
-    if (!file || file.mimetype !== "application/pdf") {
+export async function POST(request) {
+  let filePathToDelete = null;
+
+  try {
+    const nodeReq = await streamToNodeRequest(request);
+    const { files } = await parseForm(nodeReq);
+
+    const uploaded = files.resume;
+    const file = Array.isArray(uploaded) ? uploaded[0] : uploaded;
+
+    if (!file || !file.filepath) {
       return NextResponse.json(
-        { error: "Invalid or missing PDF file." },
+        { success: false, error: "File path is missing." },
         { status: 400 }
       );
     }
 
-    console.log("File________________________________", file);
-
-    const buffer = await readFile(file.filepath);
-    const rawText = await parsePdfText(buffer);
-
-    if (!rawText || rawText.length < 50) {
+    if (file.mimetype !== "application/pdf") {
       return NextResponse.json(
-        { error: "Resume text too short or unreadable." },
-        { status: 422 }
+        { success: false, error: "Uploaded file is not a pdf." },
+        { status: 400 }
       );
     }
 
-    console.log(
-      "Rawtext______________________________________________________________________",
-      rawText
-    );
+    filePathToDelete = file.filepath;
 
+    const buffer = fs.readFileSync(filePathToDelete);
+    const rawText = await parsePdfText(buffer);
     const structuredResume = await getStructuredResume(rawText);
 
-    console.log(
-      "structuredResume______________________________________________________",
-      structuredResume
-    );
-    return NextResponse.json(
-      { success: true, resume: structuredResume },
-      { status: 200 }
-    );
-  } catch (err) {
-    console.error("Resume parsing error:", err);
-    return NextResponse.json(
-      { error: "Server error during resume parsing." },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, resume: structuredResume });
+  } catch (error) {
+    console.error("Resume upload/parsing error:", error);
+    return NextResponse.json({ success: false, error: error.message });
+  } finally {
+    
+    if (filePathToDelete && fs.existsSync(filePathToDelete)) {
+      try {
+        fs.unlinkSync(filePathToDelete);
+        console.log("Deleted uploaded file:", filePathToDelete);
+      } catch (unlinkError) {
+        console.warn("Failed to delete uploaded file:", unlinkError);
+      }
+    }
   }
 }

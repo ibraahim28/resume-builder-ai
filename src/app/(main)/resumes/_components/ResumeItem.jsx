@@ -20,8 +20,9 @@ const ResumeItem = ({
 
   const reactToPrintFn = useReactToPrint({
     contentRef,
-    documentTitle : resume?.data?.generalInfo?.title || `resume-${resume?.resumeId}`,
-  })
+    documentTitle:
+      resume?.data?.generalInfo?.title || `resume-${resume?.resumeId}`,
+  });
   return (
     <>
       <div className="w-full relative group">
@@ -47,15 +48,13 @@ const ResumeItem = ({
             <button
               onClick={() => {
                 setOpenMenuId(null);
-                reactToPrintFn()
+                reactToPrintFn();
               }}
               className="w-full px-4 py-2 hover:bg-gray-100 text-left border-b"
             >
               Print
             </button>
             <button
-
-
               onClick={async () => {
                 try {
                   setIsDeleting(true);
@@ -87,7 +86,6 @@ const ResumeItem = ({
                   setIsDeleting(false);
                 }
               }}
-
               className={`w-full px-4 py-2 hover:bg-gray-100 text-left ${isDeleting ? "text-red-200" : "text-red-500"} `}
               disabled={isDeleting}
             >
@@ -97,11 +95,10 @@ const ResumeItem = ({
         )}
 
         <div
-          className="bg-white rounded-lg shadow-md p-2 sm:p-3 flex flex-col items-center text-center hover:shadow-lg transition-shadow cursor-pointer h-full"
+          className="bg-white rounded-lg shadow-md p-2 sm:p-3 flex flex-col items-center text-center hover:shadow-lg transition-shadow cursor-pointer h-[320px]"
           onClick={() => navigateToResume(resume.resumeId)}
         >
           <div className="w-full aspect-[4/5] relative mb-2 sm:mb-3">
-
             <ResumePreview resumeData={resume.data} contentRef={contentRef} />
           </div>
           <h2 className="text-sm font-semibold truncate w-full">
