@@ -1,11 +1,24 @@
-// /app/actions/getStructuredResume.js
 "use server";
 
 import { resumeSchema } from "@/lib/formValidations";
 import { generate } from "@/lib/gemini";
 
+function replaceNullsWithEmptyStrings(obj) {
+  if (obj === null) return "";
+  if (Array.isArray(obj)) return obj.map(replaceNullsWithEmptyStrings);
+  if (typeof obj === "object") {
+    const newObj = {};
+    for (const key in obj) {
+      newObj[key] = replaceNullsWithEmptyStrings(obj[key]);
+    }
+    return newObj;
+  }
+  return obj;
+}
+
 export const getStructuredResume = async (rawText) => {
-  const systemPrompt = `
+  try {
+    const systemPrompt = `
 You are a resume parser AI. Given the raw text of a resume, you must extract all relevant information and return a clean JSON object strictly matching the following schema:
 
 {
@@ -72,20 +85,30 @@ You are a resume parser AI. Given the raw text of a resume, you must extract all
 - Return valid JSON only — no markdown, no explanation.
 `;
 
-  const userPrompt = `Here is the raw resume text:\n\n"""${rawText}"""`;
+    const userPrompt = `Here is the raw resume text:\n\n"""${rawText}"""`;
 
-  const result = await generate({
-    systemPrompt,
-    userPrompt,
-    temperature: 0.3, 
-    json: true,
-  });
+    const result = await generate(systemPrompt, userPrompt);
 
-  try {
-    const parsed = JSON.parse(result);
-    const validated = resumeSchema.parse(parsed);
+    const cleaned = result
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-    const now = new Date().toISOString();
+    const parsed = JSON.parse(cleaned);
+    const cleanedParsed = replaceNullsWithEmptyStrings(parsed);
+    if (typeof cleanedParsed.personalInfo?.photo === "string") {
+
+      const photo = cleanedParsed.personalInfo.photo;
+      if (
+        !photo.startsWith("data:image/jpeg") &&
+        !photo.startsWith("data:image/png") &&
+        !photo.startsWith("data:image/gif") &&
+        !photo.startsWith("data:image/webp")
+      ) {
+        cleanedParsed.personalInfo.photo = null;
+      }
+    }
+    const validated = resumeSchema.parse(cleanedParsed);
 
     return {
       ...validated,
