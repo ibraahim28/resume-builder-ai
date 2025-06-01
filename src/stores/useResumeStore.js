@@ -29,7 +29,7 @@ const defaultResumeData = {
     projects: [
       {
         title: "",
-        techStack : [],
+        techStack: [],
         projectLink: "",
         description: "",
       },
@@ -68,7 +68,8 @@ export const useResumeStore = create(
       resumes: {},
       currentResumeId: null,
       isSaving: false,
-
+      isUploadingResume: false,
+      setIsUploadingResume: (flag) => set({ isUploadingResume: flag }),
       addResume: () => {
         const id = uuidv4();
         const timestamp = new Date().toISOString();
@@ -105,7 +106,7 @@ export const useResumeStore = create(
       setHasWorkExperience: (flag) => {
         const { currentResumeId } = get();
         if (!currentResumeId) return;
-        
+
         set((state) => ({
           resumes: {
             ...state.resumes,
