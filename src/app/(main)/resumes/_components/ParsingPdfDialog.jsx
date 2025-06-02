@@ -93,7 +93,7 @@ const ParsingPdfDialog = () => {
           </div>
         </div>
 
-        {/* Custom CSS for additional animations */}
+        
         <style jsx>{`
           @keyframes slide {
             0% {

@@ -72,17 +72,17 @@ You are a resume parser AI. Given the raw text of a resume, you must extract all
     summary: ""
   },
   appearance: {
-    colorHex: "",
-    borderStyle: ""
+    colorHex: "#000000",
+    borderStyle: "square"
   },
-  hasWorkExperience: true,
-  createdAt: ISODateString,
-  updatedAt: ISODateString
+  hasWorkExperience: true
 }
 
 - Use null for unavailable fields.
 - Only include projects, work experiences, or educations if present in the resume.
 - Return valid JSON only — no markdown, no explanation.
+- For appearance, use #000000 for colorHex and "square" for borderStyle if not specified.
+- Extract as much information as possible from the resume text.
 `;
 
     const userPrompt = `Here is the raw resume text:\n\n"""${rawText}"""`;
