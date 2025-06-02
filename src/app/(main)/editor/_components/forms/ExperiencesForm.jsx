@@ -27,8 +27,8 @@ import {
 } from "@/components/ui/card";
 import toast from "react-hot-toast";
 import { saveResume } from "../../_actions/saveResumeActions";
-import GenerateWorkExpBtn from "./generate-with-ai-btns/GenerateWorkExpBtn";
-import GenerateProjectBtn from "./generate-with-ai-btns/GenerateProjectBtn";
+import GenerateWorkExpBtn from "./generateButtons/GenerateWorkExpBtn";
+import GenerateProjectBtn from "./generateButtons/GenerateProjectBtn";
 
 export default function ExperiencesForm() {
   const {
