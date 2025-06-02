@@ -3,7 +3,6 @@ import pdfParse from "pdf-parse";
 export async function parsePdfText(buffer) {
   try {
     const data = await pdfParse(buffer);
-    console.log("Parsed data:", data);
     return data.text;
   } catch (error) {
     console.error("Error parsing PDF:", error);

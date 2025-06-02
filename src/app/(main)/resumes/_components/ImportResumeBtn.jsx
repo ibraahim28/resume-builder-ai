@@ -9,12 +9,8 @@ import ParsingPdfDialog from "./ParsingPdfDialog";
 import { useRouter } from "next/navigation";
 
 const ImportResumeBtn = () => {
-  const {
-    isUploadingResume,
-    setIsUploadingResume,
-    addResume,
-    currentResumeId,
-  } = useResumeStore();
+  const { isUploadingResume, setIsUploadingResume, addResume } =
+    useResumeStore();
   const [error, setError] = useState(null);
   const router = useRouter();
 
@@ -38,10 +34,13 @@ const ImportResumeBtn = () => {
       });
 
       const data = res.data;
-      if (data.success) {
-        console.log("Resume uploaded successfully.");
-        addResume();
-        router.push(`/editor?resumeId=${currentResumeId}`);
+      if (data.success && data.resume) {
+        console.log("Resume uploaded and parsed successfully.");
+        console.log("Parsed resume data:", data.resume);
+
+        const newResumeId = addResume(data.resume);
+
+        router.push(`/editor?resumeId=${newResumeId}`);
       }
     } catch (err) {
       console.error("Upload failed:", err);
@@ -53,12 +52,6 @@ const ImportResumeBtn = () => {
 
   return (
     <div className="space-y-2">
-      {error && (
-        <p className="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-md text-sm">
-          {error}
-        </p>
-      )}
-
       <Button
         size="lg"
         disabled={isUploadingResume}
@@ -68,6 +61,11 @@ const ImportResumeBtn = () => {
         <LucideUpload size={16} />
         {isUploadingResume ? "Uploading..." : "Import Resume"}
       </Button>
+      {error && (
+        <p className="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-md text-sm">
+          {error}
+        </p>
+      )}
 
       <input
         type="file"
