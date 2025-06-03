@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useResumeStore } from "@/stores/useResumeStore";
 import { saveResume } from "../../_actions/saveResumeActions";
 import toast from "react-hot-toast";
-import GenerateSummaryBtn from "./generate-with-ai-btns/GenerateSummaryBtn";
+import GenerateSummaryBtn from "./generateButtons/GenerateSummaryBtn";
 
 const SummaryForm = () => {
   const { resumes, currentResumeId, setResumeData, setIsSaving } =
