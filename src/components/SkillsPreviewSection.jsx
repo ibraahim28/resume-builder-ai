@@ -18,6 +18,12 @@ const SkillsPreviewSection = ({ skills: skillsProp, appearance }) => {
       <hr
         className="border-2"
         style={{
+          borderRadius:
+                  borderStyle === BorderStyles.SQUARE
+                    ? "0px"
+                    : borderStyle === BorderStyles.CIRCLE
+                      ? "999px"
+                      : "8px",
           borderColor: colorHex,
         }}
       />

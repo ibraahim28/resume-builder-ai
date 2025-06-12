@@ -4,59 +4,59 @@ import { v4 as uuidv4 } from "uuid";
 
 const defaultResumeData = {
   generalInfo: { title: "", description: "" },
-  personalInfo: {
-    photo: null,
-    firstName: "",
-    lastName: "",
-    jobTitle: "",
-    city: "",
-    country: "",
-    phone: "",
-    email: "",
-  },
-  workExperience: {
-    workExperiences: [
-      {
-        position: "",
-        company: "",
-        startDate: "",
-        endDate: "",
-        description: "",
-      },
-    ],
-  },
-  project: {
-    projects: [
-      {
-        title: "",
+        personalInfo: {
+          photo: null,
+          firstName: "",
+          lastName: "",
+          jobTitle: "",
+          city: "",
+          country: "",
+          phone: "",
+          email: "",
+        },
+        workExperience: {
+          workExperiences: [
+            {
+              position: "",
+              company: "",
+              startDate: "",
+              endDate: "",
+              description: "",
+            },
+          ],
+        },
+        project: {
+          projects: [
+            {
+              title: "",
         techStack: [],
-        projectLink: "",
-        description: "",
-      },
-    ],
-  },
-  education: {
-    educations: [
-      {
-        degree: "",
+              projectLink: "",
+              description: "",
+            },
+          ],
+        },
+        education: {
+          educations: [
+            {
+              degree: "",
         major: "",
-        school: "",
-        startDate: "",
-        endDate: "",
+              school: "",
+              startDate: "",
+              endDate: "",
+            },
+          ],
+        },
+        skills: {
+          skills: [],
+        },
+        summary: {
+          summary: "",
+        },
+        appearance: {
+          colorHex: "",
+          borderStyle: "",
       },
-    ],
-  },
-  skills: {
-    skills: [],
-  },
-  summary: {
-    summary: "",
-  },
-  appearance: {
-    colorHex: "",
-    borderStyle: "",
-  },
-  hasWorkExperience: true,
+      hasWorkExperience: true,
 
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -82,7 +82,7 @@ export const useResumeStore = create(
           createdAt: timestamp,
           updatedAt: timestamp,
         };
-        set((state) => ({
+          set((state) => ({
           resumes: {
             ...state.resumes,
             [id]: resumeData,

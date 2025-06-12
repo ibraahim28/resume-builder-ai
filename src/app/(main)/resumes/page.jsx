@@ -21,9 +21,7 @@ const Page = () => {
         </div>
         <div className="flex gap-4">
           <div>
-
-          <ImportResumeBtn />
-
+            <ImportResumeBtn />
           </div>
           <div className="w-full sm:w-auto">
             <AddNewResumeBtn />

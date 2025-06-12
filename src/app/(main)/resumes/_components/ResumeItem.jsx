@@ -95,21 +95,28 @@ const ResumeItem = ({
         )}
 
         <div
-          className="bg-white rounded-lg shadow-md p-2 sm:p-3 flex flex-col items-center text-center hover:shadow-lg transition-shadow cursor-pointer h-[320px]"
+          className="bg-white rounded-lg shadow-md p-3 flex flex-col items-center text-center hover:shadow-lg transition-shadow cursor-pointer h-[340px] w-full overflow-hidden"
           onClick={() => navigateToResume(resume.resumeId)}
         >
-          <div className="w-full aspect-[4/5] relative mb-2 sm:mb-3">
+          <div className="w-full aspect-[3/4] relative mb-2 sm:mb-4 shrink-0">
             <ResumePreview resumeData={resume.data} contentRef={contentRef} />
           </div>
-          <h2 className="text-sm font-semibold truncate w-full">
-            {resume?.data?.generalInfo?.title || "untitled"}
-          </h2>
-          <p className="text-xs truncate w-full">
-            {resume?.data?.generalInfo?.description || ""}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">
-            {getLastUpdatedTime(resume.updatedAt)}
-          </p>
+
+          <div className="w-full space-y-1 overflow-hidden">
+            <h2 className="text-sm font-semibold leading-tight w-full truncate">
+              {resume?.data?.generalInfo?.title || "untitled"}
+            </h2>
+
+            {resume?.data?.generalInfo?.description && (
+              <p className="text-xs text-gray-600 line-clamp-1">
+                {resume.data.generalInfo.description}
+              </p>
+            )}
+
+            <p className="text-xs text-gray-500 mt-1 whitespace-nowrap">
+              {getLastUpdatedTime(resume.updatedAt)}
+            </p>
+          </div>
         </div>
       </div>
     </>

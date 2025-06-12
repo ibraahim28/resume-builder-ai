@@ -1,27 +1,41 @@
+import { BorderStyles } from "@/app/(main)/editor/_components/BorderStyleButton";
 import { useResumeStore } from "@/stores/useResumeStore";
 import { formatDate } from "date-fns";
 import React from "react";
 
 const EducationPreviewSection = ({ education: educationProp, appearance }) => {
   const { resumes, currentResumeId } = useResumeStore();
-  
+
   // If props are not provided, fall back to the Zustand store
-  const educationData = educationProp || (resumes[currentResumeId]?.education || {});
-  const appearanceData = appearance || (resumes[currentResumeId]?.appearance || {});
+  const educationData =
+    educationProp || resumes[currentResumeId]?.education || {};
+  const appearanceData =
+    appearance || resumes[currentResumeId]?.appearance || {};
 
   const educations = educationData?.educations || [];
-  const { colorHex } = appearanceData;
+  const { colorHex, borderStyle } = appearanceData;
 
   const educationsNotEmpty = educations.filter(
     (edu) => Object.values(edu).filter(Boolean).length > 0
   );
   if (!educationsNotEmpty.length) return null;
 
+  const safeFormatDate = (dateStr, formatStr = "MM/yyyy") => {
+    const date = new Date(dateStr);
+    return isNaN(date) ? "Invalid Date" : formatDate(date, formatStr);
+  };
+
   return (
     <>
       <hr
         className="border-2"
         style={{
+          borderRadius:
+            borderStyle === BorderStyles.SQUARE
+              ? "0px"
+              : borderStyle === BorderStyles.CIRCLE
+                ? "999px"
+                : "8px",
           borderColor: colorHex,
         }}
       />
@@ -47,8 +61,8 @@ const EducationPreviewSection = ({ education: educationProp, appearance }) => {
               </span>
               {edu.startDate && (
                 <span>
-                  {edu.startDate &&
-                    `${formatDate(edu.startDate, "MM/yyyy")} ${edu.endDate ? `- ${formatDate(edu.endDate, "MM/yyyy")}` : ""}`}
+                  {safeFormatDate(edu.startDate)} -{" "}
+                  {edu.endDate ? safeFormatDate(edu.endDate) : "Present"}
                 </span>
               )}
             </div>

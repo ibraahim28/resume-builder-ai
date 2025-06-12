@@ -4,14 +4,24 @@ import { formatDate } from "date-fns";
 import { BorderStyles } from "@/app/(main)/editor/_components/BorderStyleButton";
 import { Badge } from "./ui/badge";
 
-const ExperiencesPreviewSection = ({ workExperience, project, appearance, hasWorkExperience: hasWorkExperienceProp }) => {
+const ExperiencesPreviewSection = ({
+  workExperience,
+  project,
+  appearance,
+  hasWorkExperience: hasWorkExperienceProp,
+}) => {
   const { resumes, currentResumeId, getHasWorkExperience } = useResumeStore();
-  
+
   // If props are not provided, fall back to the Zustand store
-  const workExperienceData = workExperience || (resumes[currentResumeId]?.workExperience || {});
-  const projectData = project || (resumes[currentResumeId]?.project || {});
-  const appearanceData = appearance || (resumes[currentResumeId]?.appearance || {});
-  const hasWorkExperience = hasWorkExperienceProp !== undefined ? hasWorkExperienceProp : getHasWorkExperience();
+  const workExperienceData =
+    workExperience || resumes[currentResumeId]?.workExperience || {};
+  const projectData = project || resumes[currentResumeId]?.project || {};
+  const appearanceData =
+    appearance || resumes[currentResumeId]?.appearance || {};
+  const hasWorkExperience =
+    hasWorkExperienceProp !== undefined
+      ? hasWorkExperienceProp
+      : getHasWorkExperience();
 
   const workExperiences = workExperienceData?.workExperiences || [];
   const projects = projectData?.projects || [];
@@ -26,11 +36,22 @@ const ExperiencesPreviewSection = ({ workExperience, project, appearance, hasWor
 
   if (!experiences.length) return null;
 
+  const safeFormatDate = (dateStr, formatStr = "MM/yyyy") => {
+    const date = new Date(dateStr);
+    return isNaN(date) ? "Invalid Date" : formatDate(date, formatStr);
+  };
+
   return (
     <>
       <hr
         className="border-2"
         style={{
+          borderRadius:
+            borderStyle === BorderStyles.SQUARE
+              ? "0px"
+              : borderStyle === BorderStyles.CIRCLE
+                ? "999px"
+                : "8px",
           borderColor: colorHex,
         }}
       />
@@ -92,8 +113,8 @@ const ExperiencesPreviewSection = ({ workExperience, project, appearance, hasWor
 
               {exp.startDate && (
                 <span>
-                  {formatDate(exp.startDate, "MM/yyyy")} -{" "}
-                  {exp.endDate ? formatDate(exp.endDate, "MM/yyyy") : "Present"}
+                  {safeFormatDate(exp.startDate)} -{" "}
+                  {exp.endDate ? safeFormatDate(exp.endDate) : "Present"}
                 </span>
               )}
             </div>

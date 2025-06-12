@@ -33,7 +33,7 @@ const ResumeEditor = () => {
       router.replace(`?${params.toString()}`);
     }
   }, [searchParams, currentResumeId]);
-
+  
   useUnloadWarning(isSaving)
 
   const setCurrentStep = (key) => {

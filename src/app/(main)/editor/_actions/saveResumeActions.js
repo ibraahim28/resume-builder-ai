@@ -12,11 +12,11 @@ export async function saveResume(currentResumeId, values) {
     if (!user) throw new Error("User not authenticated");
     const userId = user.id;
 
-    connectToDatabase();
+    await connectToDatabase();
 
     console.log("Values ==========================", values);
 
-    const parsed = resumeSchema.parse(values);
+    const parsed = resumeSchema.parse(valuess);
 
     const existingResume = currentResumeId
       ? await Resume.findOne({ resumeId: currentResumeId, userId })
@@ -41,7 +41,10 @@ export async function saveResume(currentResumeId, values) {
     } else if (photoUrl === null) {
       // If photo was removed
       if (existingResume?.personalInfo?.photo) {
-        await deleteFromCloudinary(existingResume.personalInfo.photo);
+        await withRetry(
+          () => deleteFromCloudinary(existingResume.personalInfo.photo),
+          "cloudinary-cleanup"
+        );
       }
     }
 
@@ -96,10 +99,59 @@ export async function saveResume(currentResumeId, values) {
       resumeData: resumeDoc.data,
     };
   } catch (error) {
-    console.error("Resume save error:", error);
+    // Key changes implemented:
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 1000;
+
+    // Retry wrapper for critical operations
+    async function withRetry(fn, context = "") {
+      for (let i = 0; i < MAX_RETRIES; i++) {
+        try {
+          return await fn();
+        } catch (error) {
+          console.error(`Attempt ${i + 1} failed for ${context}:`, error);
+          if (i === MAX_RETRIES - 1) throw error;
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+        }
+      }
+    }
+
+    // Enhanced database connection with verification
+    await withRetry(async () => {
+      const conn = await connectToDatabase();
+      if (!conn) throw new Error("Database connection failed");
+      return conn;
+    }, "database-connection");
+
+    // Cloudinary operations with retries
+    await withRetry(
+      () => deleteFromCloudinary(existingResume.personalInfo.photo),
+      "cloudinary-delete"
+    );
+
+    // Database writes with retries
+    resumeDoc = await withRetry(
+      () =>
+        Resume.findByIdAndUpdate(
+          existingResume._id,
+          { data: normalizedResume, updatedAt: now },
+          { new: true }
+        ),
+      "resume-update"
+    );
+
+    // Detailed error logging without exposing sensitive data
+    console.error("Resume save error:", {
+      message: error.message,
+      userId: user?.id,
+      errorCode: "SAVE_FAILURE",
+    });
+
+    // User-friendly error response
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: "Failed to save resume. Please try again.",
+      errorCode: "SAVE_FAILURE",
     };
   }
 }
