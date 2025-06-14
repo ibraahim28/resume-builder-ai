@@ -122,7 +122,7 @@ const SummaryForm = () => {
       <div className="space-y-1.5 text-center">
         <h2 className="text-2xl font-semibold">Professional Summary</h2>
         <p className="text-sm text-muted-foreground">
-          Create a compelling summary of your qualifications or generate one
+          Write a compelling summary of your qualifications or generate one
           with AI.
         </p>
         {saveStatus === "saving" && (

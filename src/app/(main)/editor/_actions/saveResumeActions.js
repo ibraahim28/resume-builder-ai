@@ -1,6 +1,6 @@
 "use server";
 
-import { resumeSchema } from "@/lib/formValidations";
+import { partialResumeSchema } from "@/lib/formValidations";
 import Resume from "@/models/Resume";
 import { currentUser } from "@clerk/nextjs/server";
 import { uploadToCloudinary, deleteFromCloudinary } from "@/lib/cloudinary";
@@ -21,7 +21,7 @@ export async function saveResume(currentResumeId, values) {
 
     await connectToDatabase();
 
-    parsed = resumeSchema.parse(values);
+    parsed = partialResumeSchema.parse(values);
 
     existingResume = currentResumeId
       ? await Resume.findOne({ resumeId: currentResumeId, userId })
@@ -98,6 +98,8 @@ export async function saveResume(currentResumeId, values) {
   } catch (error) {
     console.error("Resume save error:", {
       message: error.message,
+      stack: error.stack,
+      rawValues: values,
       userId: user?.id,
       errorCode: "SAVE_FAILURE",
     });

@@ -157,3 +157,5 @@ export const resumeScoreSchema = z.object({
   }),
   tips: z.array(z.string()),
 });
+
+export const partialResumeSchema = resumeSchema.partial();
