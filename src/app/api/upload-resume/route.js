@@ -27,7 +27,8 @@ async function streamToNodeRequest(request) {
 }
 
 function parseForm(req) {
-  const uploadDir = path.join(process.cwd(), "tmp", "uploads");
+  const uploadDir = "/tmp/uploads"; // ✅ Vercel-compatible temp folder
+
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });

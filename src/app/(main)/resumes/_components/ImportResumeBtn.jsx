@@ -44,7 +44,7 @@ const ImportResumeBtn = () => {
       }
     } catch (err) {
       console.error("Upload failed:", err);
-      setError("Upload failed. Please try again.");
+      setError(err.message || "Upload failed. Please try again later.");
     } finally {
       setIsUploadingResume(false);
     }
