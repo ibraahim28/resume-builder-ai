@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/upload-resume/route.js": {
-      "runtime": "nodejs"
-    }
-  }
-}
