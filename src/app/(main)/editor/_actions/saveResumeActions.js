@@ -44,10 +44,7 @@ export async function saveResume(currentResumeId, values) {
       photoUrl = cloudinaryResult.secure_url;
     } else if (photoUrl === null) {
       if (existingResume?.personalInfo?.photo) {
-        await withRetry(
-          () => deleteFromCloudinary(existingResume.personalInfo.photo),
-          "cloudinary-cleanup"
-        );
+        await deleteFromCloudinary(existingResume.personalInfo.photo);
       }
     }
 
@@ -99,51 +96,6 @@ export async function saveResume(currentResumeId, values) {
       resumeData: resumeDoc.data,
     };
   } catch (error) {
-    // Retry wrapper for critical operations
-    const MAX_RETRIES = 3;
-    const RETRY_DELAY = 1000;
-    async function withRetry(fn, context = "") {
-      for (let i = 0; i < MAX_RETRIES; i++) {
-        try {
-          return await fn();
-        } catch (error) {
-          console.error(`Attempt ${i + 1} failed for ${context}:`, error);
-          if (i === MAX_RETRIES - 1) throw error;
-          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-        }
-      }
-    }
-
-    // Fallback safety
-    if (!user) {
-      return {
-        success: false,
-        error: "Not authenticated",
-        errorCode: "AUTH_FAILURE",
-      };
-    }
-
-    // Safe cloudinary delete
-    if (existingResume?.personalInfo?.photo) {
-      await withRetry(
-        () => deleteFromCloudinary(existingResume.personalInfo.photo),
-        "cloudinary-delete"
-      );
-    }
-
-    // Fallback update attempt
-    if (existingResume?._id && normalizedResume) {
-      await withRetry(
-        () =>
-          Resume.findByIdAndUpdate(
-            existingResume._id,
-            { data: normalizedResume, updatedAt: new Date().toISOString() },
-            { new: true }
-          ),
-        "resume-update"
-      );
-    }
-
     console.error("Resume save error:", {
       message: error.message,
       userId: user?.id,
