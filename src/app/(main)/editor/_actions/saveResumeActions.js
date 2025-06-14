@@ -7,20 +7,27 @@ import { uploadToCloudinary, deleteFromCloudinary } from "@/lib/cloudinary";
 import connectToDatabase from "@/lib/db";
 
 export async function saveResume(currentResumeId, values) {
+  let existingResume = null;
+  let parsed = null;
+  let normalizedResume = null;
+  let resumeDoc = null;
+  let photoUrl = null;
+  let user = null;
+
   try {
-    const user = await currentUser();
+    user = await currentUser();
     if (!user) throw new Error("User not authenticated");
     const userId = user.id;
 
     await connectToDatabase();
 
-    const parsed = resumeSchema.parse(values);
+    parsed = resumeSchema.parse(values);
 
-    const existingResume = currentResumeId
+    existingResume = currentResumeId
       ? await Resume.findOne({ resumeId: currentResumeId, userId })
       : null;
 
-    let photoUrl = parsed.personalInfo.photo;
+    photoUrl = parsed.personalInfo.photo;
     let cloudinaryResult = null;
 
     // Handle photo upload/removal
@@ -29,7 +36,6 @@ export async function saveResume(currentResumeId, values) {
         await deleteFromCloudinary(existingResume.personalInfo.photo);
       }
 
-      // Upload new photo
       cloudinaryResult = await uploadToCloudinary(photoUrl, {
         public_id: `resume_${userId}_${currentResumeId}_${Date.now()}`,
         transformation: [{ width: 500, height: 500, crop: "limit" }],
@@ -37,7 +43,6 @@ export async function saveResume(currentResumeId, values) {
 
       photoUrl = cloudinaryResult.secure_url;
     } else if (photoUrl === null) {
-      // If photo was removed
       if (existingResume?.personalInfo?.photo) {
         await withRetry(
           () => deleteFromCloudinary(existingResume.personalInfo.photo),
@@ -49,7 +54,7 @@ export async function saveResume(currentResumeId, values) {
     parsed.personalInfo.photo = photoUrl;
 
     const now = new Date().toISOString();
-    const normalizedResume = {
+    normalizedResume = {
       ...parsed,
       personalInfo: {
         ...parsed.personalInfo,
@@ -73,9 +78,6 @@ export async function saveResume(currentResumeId, values) {
       updatedAt: now,
     };
 
-    let resumeDoc;
-
-    // update the resume if it exists, otherwise create a new one
     if (existingResume) {
       resumeDoc = await Resume.findByIdAndUpdate(
         existingResume._id,
@@ -97,11 +99,9 @@ export async function saveResume(currentResumeId, values) {
       resumeData: resumeDoc.data,
     };
   } catch (error) {
-    // Key changes implemented:
+    // Retry wrapper for critical operations
     const MAX_RETRIES = 3;
     const RETRY_DELAY = 1000;
-
-    // Retry wrapper for critical operations
     async function withRetry(fn, context = "") {
       for (let i = 0; i < MAX_RETRIES; i++) {
         try {
@@ -114,38 +114,42 @@ export async function saveResume(currentResumeId, values) {
       }
     }
 
-    // Enhanced database connection with verification
-    await withRetry(async () => {
-      const conn = await connectToDatabase();
-      if (!conn) throw new Error("Database connection failed");
-      return conn;
-    }, "database-connection");
+    // Fallback safety
+    if (!user) {
+      return {
+        success: false,
+        error: "Not authenticated",
+        errorCode: "AUTH_FAILURE",
+      };
+    }
 
-    // Cloudinary operations with retries
-    await withRetry(
-      () => deleteFromCloudinary(existingResume.personalInfo.photo),
-      "cloudinary-delete"
-    );
+    // Safe cloudinary delete
+    if (existingResume?.personalInfo?.photo) {
+      await withRetry(
+        () => deleteFromCloudinary(existingResume.personalInfo.photo),
+        "cloudinary-delete"
+      );
+    }
 
-    // Database writes with retries
-    resumeDoc = await withRetry(
-      () =>
-        Resume.findByIdAndUpdate(
-          existingResume._id,
-          { data: normalizedResume, updatedAt: now },
-          { new: true }
-        ),
-      "resume-update"
-    );
+    // Fallback update attempt
+    if (existingResume?._id && normalizedResume) {
+      await withRetry(
+        () =>
+          Resume.findByIdAndUpdate(
+            existingResume._id,
+            { data: normalizedResume, updatedAt: new Date().toISOString() },
+            { new: true }
+          ),
+        "resume-update"
+      );
+    }
 
-    // Detailed error logging without exposing sensitive data
     console.error("Resume save error:", {
       message: error.message,
       userId: user?.id,
       errorCode: "SAVE_FAILURE",
     });
 
-    // User-friendly error response
     return {
       success: false,
       error: "Failed to save resume. Please try again.",
