@@ -49,7 +49,7 @@ export default function ExperiencesForm() {
 
   const hasWorkExperience = getHasWorkExperience();
 
-  const resumeData = resumes[currentResumeId] || {};
+  const resumeData = resumes?.[currentResumeId] || {};
 
   const timeoutRef = useRef();
   const [saveStatus, setSaveStatus] = useState(null);
@@ -76,12 +76,10 @@ export default function ExperiencesForm() {
   const isFormEmpty = (entries) =>
     !entries?.length ||
     entries.every((entry) => {
-      // For work experiences, check if any of the main fields have values
       if (hasWorkExperience) {
-        return !entry.position && !entry.company && !entry.description;
+        return !entry?.position && !entry?.company && !entry?.description;
       }
-      // For projects, check if any of the main fields have values
-      return !entry.title && !entry.description && !entry.techStack?.length;
+      return !entry?.title && !entry?.description && !entry?.techStack?.length;
     });
 
   const form = useForm({
@@ -91,11 +89,11 @@ export default function ExperiencesForm() {
     defaultValues: hasWorkExperience
       ? {
           workExperiences:
-            resumeData.workExperience?.workExperiences ||
+            resumeData?.workExperience?.workExperiences ||
             defaultWorkExperiences,
         }
       : {
-          projects: resumeData.project?.projects || defaultProjects,
+          projects: resumeData?.project?.projects || defaultProjects,
         },
     mode: "onChange",
   });
@@ -121,6 +119,7 @@ export default function ExperiencesForm() {
       timeoutRef.current = setTimeout(async () => {
         setIsSaving(true);
         setSaveStatus("saving");
+
         try {
           const isValid = await form.trigger();
 
@@ -132,13 +131,13 @@ export default function ExperiencesForm() {
 
           const rawValues = form.getValues();
           const currentValues = hasWorkExperience
-            ? resumeData.workExperience
-            : resumeData.project;
+            ? resumeData?.workExperience
+            : resumeData?.project;
 
           const hasChanges = hasWorkExperience
-            ? JSON.stringify(rawValues.workExperiences) !==
+            ? JSON.stringify(rawValues?.workExperiences) !==
               JSON.stringify(currentValues?.workExperiences)
-            : JSON.stringify(rawValues.projects) !==
+            : JSON.stringify(rawValues?.projects) !==
               JSON.stringify(currentValues?.projects);
 
           if (hasChanges) {
@@ -147,39 +146,34 @@ export default function ExperiencesForm() {
                 return {
                   ...prev,
                   workExperience: {
-                    ...prev.workExperience,
-                    workExperiences: rawValues.workExperiences,
+                    ...prev?.workExperience,
+                    workExperiences: rawValues?.workExperiences,
                   },
                 };
               } else {
                 return {
                   ...prev,
                   project: {
-                    ...prev.project,
-                    projects: rawValues.projects,
+                    ...prev?.project,
+                    projects: rawValues?.projects,
                   },
                 };
               }
             });
 
-            const updatedResumes = resumeStore.getState().resumes;
-            console.log(
-              "updatedStoreResume-----------------",
-              updatedResumes[currentResumeId]
-            );
+            const updatedResumes = resumeStore.getState()?.resumes;
 
             const result = await saveResume(
               currentResumeId,
-              updatedResumes[currentResumeId]
+              updatedResumes?.[currentResumeId]
             );
 
-            if (!result.success) {
+            if (!result?.success) {
               toast.error("Error saving Resume");
               setIsSaving(false);
               setSaveStatus("error");
             }
 
-            console.log("result---------------------", result);
             setIsSaving(false);
             setSaveStatus("saved");
           } else {
@@ -204,6 +198,7 @@ export default function ExperiencesForm() {
     control: form.control,
     name: hasWorkExperience ? "workExperiences" : "projects",
   });
+
   if (!mounted) return null;
 
   const handleToggleExperience = () => {

@@ -26,22 +26,22 @@ const SkillsForm = () => {
     useResumeStore();
   const resumeStore = useResumeStore;
 
-  const resumeData = resumes[currentResumeId] || {};
+  const resumeData = resumes?.[currentResumeId] || {};
 
   const form = useForm({
     resolver: zodResolver(skillsSchema),
     defaultValues: {
-      skills: resumeData.skills?.skills || [],
+      skills: resumeData?.skills?.skills || [],
     },
   });
 
   useEffect(() => {
-    if (resumeData.skills) {
+    if (resumeData?.skills) {
       form.reset({
-        skills: resumeData.skills.skills || [],
+        skills: resumeData?.skills?.skills || [],
       });
     }
-  }, [resumeData.skills, form]);
+  }, [resumeData?.skills, form]);
 
   const skills = form.getValues("skills");
 
@@ -50,57 +50,57 @@ const SkillsForm = () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
       timeoutRef.current = setTimeout(async () => {
-        setIsSaving(true);
+        setIsSaving?.(true);
         setSaveStatus("saving");
 
         try {
           const isValid = await form.trigger("skills");
 
           if (!isValid) {
-            setIsSaving(false);
+            setIsSaving?.(false);
             setSaveStatus("error");
             return;
           }
 
           const rawValues = form.getValues();
-          const currentValues = resumeData.skills;
+          const currentValues = resumeData?.skills;
 
           const hasChanges =
-            JSON.stringify(rawValues.skills) !==
+            JSON.stringify(rawValues?.skills) !==
             JSON.stringify(currentValues?.skills);
 
           if (hasChanges) {
-            setResumeData((prev) => ({
+            setResumeData?.((prev) => ({
               ...prev,
               skills: {
-                ...prev.skills,
-                skills: rawValues.skills,
+                ...prev?.skills,
+                skills: rawValues?.skills,
               },
             }));
 
-            const updatedResumes = resumeStore.getState().resumes;
+            const updatedResumes = resumeStore?.getState?.()?.resumes;
 
-            const result = await saveResume(
+            const result = await saveResume?.(
               currentResumeId,
-              updatedResumes[currentResumeId]
+              updatedResumes?.[currentResumeId]
             );
 
-            if (!result.success) {
+            if (!result?.success) {
               toast.error("Error saving Resume");
-              setIsSaving(false);
+              setIsSaving?.(false);
               setSaveStatus("error");
               return;
             }
 
-            setIsSaving(false);
+            setIsSaving?.(false);
             setSaveStatus("saved");
           } else {
-            setIsSaving(false);
+            setIsSaving?.(false);
             setSaveStatus(null);
           }
         } catch (error) {
           console.error("Error saving skills:", error);
-          setIsSaving(false);
+          setIsSaving?.(false);
           setSaveStatus("error");
         }
       }, 2000);
@@ -110,19 +110,19 @@ const SkillsForm = () => {
       subscription.unsubscribe();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [form, resumeData.skills, setResumeData]);
+  }, [form, resumeData?.skills, setResumeData]);
 
   const addSkill = () => {
-    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-      const updatedSkills = [...skills, newSkill.trim()];
+    if (newSkill.trim() && !skills?.includes(newSkill.trim())) {
+      const updatedSkills = [...(skills || []), newSkill.trim()];
       form.setValue("skills", updatedSkills);
       setNewSkill("");
     }
   };
 
   const removeSkill = (skillToRemove) => {
-    const updatedSkills = skills.filter((skill) => skill !== skillToRemove);
-    form.setValue("skills", updatedSkills);
+    const updatedSkills = skills?.filter((skill) => skill !== skillToRemove);
+    form.setValue("skills", updatedSkills || []);
   };
 
   const handleKeyDown = (e) => {
@@ -177,12 +177,12 @@ const SkillsForm = () => {
           <div className="mt-6">
             <h3 className="text-sm font-medium mb-2">Your Skills:</h3>
             <div className="flex flex-wrap gap-2">
-              {skills.length === 0 ? (
+              {skills?.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   No skills added yet
                 </p>
               ) : (
-                skills.map((skill, index) => (
+                skills?.map((skill, index) => (
                   <Badge key={index} variant="secondary" className="px-3 py-1">
                     {skill}
                     <button
@@ -197,19 +197,6 @@ const SkillsForm = () => {
               )}
             </div>
           </div>
-
-          {/* Save Status Indicator */}
-          {/* <div className="text-xs text-muted-foreground mt-4">
-            {saveStatus === "saving" && (
-              <span className="text-blue-500">Saving...</span>
-            )}
-            {saveStatus === "saved" && (
-              <span className="text-green-500">Saved ✅</span>
-            )}
-            {saveStatus === "error" && (
-              <span className="text-red-500">Error saving ❌</span>
-            )}
-          </div> */}
         </form>
       </Form>
     </div>

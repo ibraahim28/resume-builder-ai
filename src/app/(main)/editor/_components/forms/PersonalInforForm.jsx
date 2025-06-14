@@ -30,14 +30,14 @@ export default function PersonalInfoForm() {
   const form = useForm({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      firstName: resumeData.personalInfo?.firstName || "",
-      lastName: resumeData.personalInfo?.lastName || "",
-      jobTitle: resumeData.personalInfo?.jobTitle || "",
-      city: resumeData.personalInfo?.city || "",
-      country: resumeData.personalInfo?.country || "",
-      phone: resumeData.personalInfo?.phone || "",
-      email: resumeData.personalInfo?.email || "",
-      photo: resumeData.personalInfo?.photo || null,
+      firstName: resumeData?.personalInfo?.firstName || "",
+      lastName: resumeData?.personalInfo?.lastName || "",
+      jobTitle: resumeData?.personalInfo?.jobTitle || "",
+      city: resumeData?.personalInfo?.city || "",
+      country: resumeData?.personalInfo?.country || "",
+      phone: resumeData?.personalInfo?.phone || "",
+      email: resumeData?.personalInfo?.email || "",
+      photo: resumeData?.personalInfo?.photo || null,
     },
     mode: "onChange",
   });
@@ -52,21 +52,21 @@ export default function PersonalInfoForm() {
   };
 
   useEffect(() => {
-    if (resumeData.personalInfo) {
+    if (resumeData?.personalInfo) {
       const newValues = {
-        firstName: resumeData.personalInfo.firstName || "",
-        lastName: resumeData.personalInfo.lastName || "",
-        jobTitle: resumeData.personalInfo.jobTitle || "",
-        city: resumeData.personalInfo.city || "",
-        country: resumeData.personalInfo.country || "",
-        phone: resumeData.personalInfo.phone || "",
-        email: resumeData.personalInfo.email || "",
-        photo: resumeData.personalInfo.photo || null,
+        firstName: resumeData?.personalInfo?.firstName || "",
+        lastName: resumeData?.personalInfo?.lastName || "",
+        jobTitle: resumeData?.personalInfo?.jobTitle || "",
+        city: resumeData?.personalInfo?.city || "",
+        country: resumeData?.personalInfo?.country || "",
+        phone: resumeData?.personalInfo?.phone || "",
+        email: resumeData?.personalInfo?.email || "",
+        photo: resumeData?.personalInfo?.photo || null,
       };
 
       form.reset(newValues);
     }
-  }, [resumeData.personalInfo, form]);
+  }, [resumeData?.personalInfo, form]);
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
@@ -85,7 +85,7 @@ export default function PersonalInfoForm() {
           }
 
           const rawValues = form.getValues();
-          const currentValues = resumeData.personalInfo;
+          const currentValues = resumeData?.personalInfo;
 
           let photoValue = rawValues.photo;
           if (photoValue instanceof File) {
@@ -105,7 +105,7 @@ export default function PersonalInfoForm() {
             setResumeData((prev) => ({
               ...prev,
               personalInfo: {
-                ...prev.personalInfo,
+                ...prev?.personalInfo,
                 ...rawValues,
                 photo: photoValue,
               },
@@ -146,7 +146,7 @@ export default function PersonalInfoForm() {
       subscription.unsubscribe();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [form, resumeData.personalInfo, setResumeData]);
+  }, [form, resumeData?.personalInfo, setResumeData]);
 
   const handleRemovePhoto = async () => {
     setIsSaving(true);
@@ -159,7 +159,7 @@ export default function PersonalInfoForm() {
       setResumeData((prev) => ({
         ...prev,
         personalInfo: {
-          ...prev.personalInfo,
+          ...prev?.personalInfo,
           photo: null,
         },
       }));

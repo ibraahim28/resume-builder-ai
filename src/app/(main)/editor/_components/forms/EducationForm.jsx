@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useRef, useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,7 +32,8 @@ const EducationForm = () => {
   const { resumes, currentResumeId, setResumeData, setIsSaving } =
     useResumeStore();
   const resumeStore = useResumeStore;
-  const resumeData = resumes[currentResumeId] || {};
+
+  const resumeData = resumes?.[currentResumeId] || {};
 
   const form = useForm({
     resolver: zodResolver(educationSchema),
@@ -54,7 +56,7 @@ const EducationForm = () => {
   });
 
   useEffect(() => {
-    if (resumeData.education) {
+    if (resumeData?.education) {
       const newValues = {
         educations: resumeData?.education?.educations || [
           {
@@ -68,7 +70,7 @@ const EducationForm = () => {
 
       form.reset(newValues);
     }
-  }, [resumeData.education, form]);
+  }, [resumeData?.education, form]);
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
@@ -87,34 +89,34 @@ const EducationForm = () => {
           }
 
           const rawValues = form.getValues();
-          const currentValues = resumeData.education;
+          const currentValues = resumeData?.education;
 
           const hasChanges =
-            JSON.stringify(rawValues.educations) !==
+            JSON.stringify(rawValues?.educations) !==
             JSON.stringify(currentValues?.educations);
 
           if (hasChanges) {
             setResumeData((prev) => ({
               ...prev,
               education: {
-                ...prev.education,
-                educations: rawValues.educations,
+                ...prev?.education,
+                educations: rawValues?.educations,
               },
             }));
 
-            const updatedResumes = resumeStore.getState().resumes;
+            const updatedResumes = resumeStore.getState()?.resumes;
             console.log(
               "updatedStoreResume-----------------",
-              updatedResumes[currentResumeId]
+              updatedResumes?.[currentResumeId]
             );
 
             const result = await saveResume(
               currentResumeId,
-              updatedResumes[currentResumeId]
+              updatedResumes?.[currentResumeId]
             );
             console.log("result-----------------", result);
 
-            if (!result.success) {
+            if (!result?.success) {
               toast.error("Error saving Resume");
               setIsSaving(false);
               setSaveStatus("error");
@@ -138,7 +140,7 @@ const EducationForm = () => {
       subscription.unsubscribe();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [form, resumeData.education, setResumeData]);
+  }, [form, resumeData?.education, setResumeData]);
 
   const addNewEducation = () => {
     append({

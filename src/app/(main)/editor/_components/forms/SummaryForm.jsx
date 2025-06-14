@@ -19,16 +19,15 @@ import toast from "react-hot-toast";
 import GenerateSummaryBtn from "./generateButtons/GenerateSummaryBtn";
 
 const SummaryForm = () => {
-  const { resumes, currentResumeId, setResumeData, setIsSaving } =
-    useResumeStore();
+  const { resumes, currentResumeId, setResumeData, setIsSaving } = useResumeStore();
   const resumeStore = useResumeStore;
 
-  const resumeData = resumes[currentResumeId] || {};
+  const resumeData = resumes?.[currentResumeId] || {};
 
   const form = useForm({
     resolver: zodResolver(summarySchema),
     defaultValues: {
-      summary: resumeData.summary?.summary || "",
+      summary: resumeData?.summary?.summary || "",
     },
     mode: "onChange",
   });
@@ -37,75 +36,70 @@ const SummaryForm = () => {
   const [saveStatus, setSaveStatus] = useState(null);
 
   useEffect(() => {
-    if (resumeData.summary) {
+    if (resumeData?.summary) {
       const newValues = {
-        summary: resumeData.summary.summary || "",
+        summary: resumeData?.summary?.summary || "",
       };
-
       form.reset(newValues);
     }
-  }, [resumeData.summary, form]);
+  }, [resumeData?.summary, form]);
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
       timeoutRef.current = setTimeout(async () => {
-        setIsSaving(true);
+        setIsSaving?.(true);
         setSaveStatus("saving");
+
         try {
           const isValid = await form.trigger();
 
           if (!isValid) {
-            setIsSaving(false);
+            setIsSaving?.(false);
             setSaveStatus("error");
             return;
           }
 
           const rawValues = form.getValues();
-          const currentValues = resumeData.summary;
+          const currentValues = resumeData?.summary;
 
           const hasChanges = Object.keys(rawValues).some(
             (key) => rawValues[key] !== currentValues?.[key]
           );
 
           if (hasChanges) {
-            setResumeData((prev) => ({
+            setResumeData?.((prev) => ({
               ...prev,
               summary: {
-                ...prev.summary,
+                ...prev?.summary,
                 ...rawValues,
               },
             }));
 
-            const updatedResumes = resumeStore.getState().resumes;
-            console.log(
-              "updatedStoreResume-----------------",
-              updatedResumes[currentResumeId]
-            );
+            const updatedResumes = resumeStore?.getState?.()?.resumes;
 
-            const result = await saveResume(
+            const result = await saveResume?.(
               currentResumeId,
-              updatedResumes[currentResumeId]
+              updatedResumes?.[currentResumeId]
             );
 
-            if (!result.success) {
+            if (!result?.success) {
               toast.error("Error saving Resume");
-              setIsSaving(false);
+              setIsSaving?.(false);
               setSaveStatus("error");
+              return;
             }
 
-            console.log("result---------------------", result);
-
-            setIsSaving(false);
+            setIsSaving?.(false);
             setSaveStatus("saved");
           } else {
-            setIsSaving(false);
+            setIsSaving?.(false);
             setSaveStatus(null);
           }
         } catch (error) {
           console.error("Error saving summary:", error);
-          setIsSaving(false);
+          setIsSaving?.(false);
           setSaveStatus("error");
         }
       }, 2000);
@@ -115,7 +109,7 @@ const SummaryForm = () => {
       subscription.unsubscribe();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [form, resumeData.summary, setResumeData]);
+  }, [form, resumeData?.summary, setResumeData]);
 
   return (
     <div className="max-w-xl mx-auto space-y-6">
@@ -137,6 +131,7 @@ const SummaryForm = () => {
           </p>
         )}
       </div>
+
       <Form {...form}>
         <form className="space-y-4">
           <FormField
