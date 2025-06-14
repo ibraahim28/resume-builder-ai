@@ -28,8 +28,8 @@ const GeneralInfoForm = () => {
   const form = useForm({
     resolver: zodResolver(generalInfoSchema),
     defaultValues: {
-      title: resumeData.generalInfo?.title || "",
-      description: resumeData.generalInfo?.description || "",
+      title: resumeData?.generalInfo?.title || "",
+      description: resumeData?.generalInfo?.description || "",
     },
     mode: "onChange",
   });
@@ -39,8 +39,8 @@ const GeneralInfoForm = () => {
   useEffect(() => {
     if (resumeData.generalInfo) {
       const newValues = {
-        title: resumeData.generalInfo.title || "",
-        description: resumeData.generalInfo.description || "",
+        title: resumeData?.generalInfo?.title || "",
+        description: resumeData?.generalInfo?.description || "",
       };
 
       form.reset(newValues);
@@ -64,7 +64,7 @@ const GeneralInfoForm = () => {
           }
 
           const rawValues = form.getValues();
-          const currentValues = resumeData.generalInfo;
+          const currentValues = resumeData?.generalInfo;
 
           const hasChanges = Object.keys(rawValues).some(
             (key) => rawValues[key] !== currentValues?.[key]
@@ -74,7 +74,7 @@ const GeneralInfoForm = () => {
             setResumeData((prev) => ({
               ...prev,
               generalInfo: {
-                ...prev.generalInfo,
+                ...prev?.generalInfo,
                 ...rawValues,
               },
             }));
