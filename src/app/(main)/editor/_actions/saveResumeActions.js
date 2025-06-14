@@ -14,9 +14,7 @@ export async function saveResume(currentResumeId, values) {
 
     await connectToDatabase();
 
-    console.log("Values ==========================", values);
-
-    const parsed = resumeSchema.parse(valuess);
+    const parsed = resumeSchema.parse(values);
 
     const existingResume = currentResumeId
       ? await Resume.findOne({ resumeId: currentResumeId, userId })
