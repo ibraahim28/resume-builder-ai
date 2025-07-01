@@ -90,6 +90,8 @@ const SkillsForm = () => {
               setIsSaving?.(false);
               setSaveStatus("error");
               return;
+            }else {
+              setSaveStatus("saved");
             }
 
             setIsSaving?.(false);

@@ -176,9 +176,10 @@ export default function PersonalInfoForm() {
         setIsSaving(false);
         setSaveStatus("error");
         return;
+      }else {
+        setSaveStatus("saved");
       }
 
-      setSaveStatus("saved");
     } catch (e) {
       console.error(e);
       setSaveStatus("error");

@@ -126,7 +126,7 @@ const EducationForm = () => {
             setSaveStatus("saved");
           } else {
             setIsSaving(false);
-            setSaveStatus(null);
+            setSaveStatus(saved);
           }
         } catch (error) {
           console.error("Error saving education:", error);

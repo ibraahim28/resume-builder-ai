@@ -172,6 +172,8 @@ export default function ExperiencesForm() {
               toast.error("Error saving Resume");
               setIsSaving(false);
               setSaveStatus("error");
+            }else {
+              setSaveStatus("saved");
             }
 
             setIsSaving(false);
